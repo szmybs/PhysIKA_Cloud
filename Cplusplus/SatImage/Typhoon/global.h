@@ -7,7 +7,6 @@
 #include <atlstr.h> 
 #include <fstream>
 #include <iostream>
-#include "Vector.h"
 #include <vector>
 using namespace std;
 //GL

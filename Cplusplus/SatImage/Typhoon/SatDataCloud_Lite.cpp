@@ -317,10 +317,12 @@ void SatDataCloud::TimeChannel2FileName(CString satStr, char strFile[256], Date 
 	//FY2E_SEC_VIS_MLS_20120806_2200.AWX
 	CString filename;
 	filename = channelStr;
+	std::cout<<"filename : "<<filename<<endl;
 
 	CString str;
 	str.Format("%d", date.year);
 	filename += str;
+	std::cout<<"filename : "<<filename<<endl;
 
 	if (date.month < 10)
 	{
@@ -331,6 +333,7 @@ void SatDataCloud::TimeChannel2FileName(CString satStr, char strFile[256], Date 
 		str.Format("%d", date.month);
 	}
 	filename += str;
+	std::cout<<"filename : "<<filename<<endl;
 
 	if (date.day < 10)
 	{
@@ -340,8 +343,8 @@ void SatDataCloud::TimeChannel2FileName(CString satStr, char strFile[256], Date 
 	{
 		str.Format("%d_", date.day);
 	}
-
 	filename += str;
+	std::cout<<"filename : "<<filename<<endl;
 
 	if (hour < 10)
 	{
@@ -351,8 +354,8 @@ void SatDataCloud::TimeChannel2FileName(CString satStr, char strFile[256], Date 
 	{
 		str.Format("%d", hour);
 	}
-
 	filename += str;
+	std::cout<<"filename : "<<filename<<endl;
 
 	//switch (channel)
 	//{
@@ -383,6 +386,7 @@ void SatDataCloud::TimeChannel2FileName(CString satStr, char strFile[256], Date 
 		filename += "30.AWX";
 	}
 	filename = satStr + filename;
+	std::cout<<"filename : "<<filename<<endl;
 	//Cstring to char*
 	_tcscpy(_T(strFile), filename.GetBuffer(filename.GetLength()));
 }
@@ -948,18 +952,19 @@ void SatDataCloud::IntepImgData(int nframe, SatDataType channel, float* img_data
 
 // Render.cpp -> Run()部分
 void SatDataCloud::Run(Date date, string satStr, string savePath, string saveName) //No.41
-{
+{	
+	ReadSatData(satStr.c_str(), date, VIS);
+	ReadSatData(satStr.c_str(), date, IR1);
+	ReadSatData(satStr.c_str(), date, IR2);
+	ReadSatData(satStr.c_str(), date, IR3);
+	ReadSatData(satStr.c_str(), date, IR4);
+
 	CreateLongLatTable();
 	CreateAltitudeTable();
 	CreateSatZenithAzimuthIfo();
 	CreateSunZenithAzimuthIfo(date); //CreateSunZenithAzimuthIfo(Date(2013,7,10));
 	//CreateSunZenithAzimuthIfoFromFile("sunZenithAzimuth.dat");
 
-	ReadSatData(satStr.c_str(), date, VIS);
-	ReadSatData(satStr.c_str(), date, IR1);
-	ReadSatData(satStr.c_str(), date, IR2);
-	ReadSatData(satStr.c_str(), date, IR3);
-	ReadSatData(satStr.c_str(), date, IR4);
 	//ReadSatData(Date(2013, 7, 10), VIS);
 	//ReadSatData(Date(2013, 7, 10), IR1);
 	//ReadSatData(Date(2013, 7, 10), IR2);
