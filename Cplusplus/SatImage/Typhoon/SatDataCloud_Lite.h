@@ -5,6 +5,9 @@
 #include "Utility/perlin.h"
 #include <vector>
 #include <algorithm> 
+#include <string>
+#include <fstream>
+#include <cmath>
 
 enum SatDataType { IR1, IR2, IR3, IR4, VIS, CLC, CTT };
 enum DrawType { LongLat, SunZA, Seg, TopSurface, BottomSurface, Thick, EffRadius, Extinction };
@@ -13,18 +16,44 @@ struct Date
 	int year;
 	int month;
 	int day;
+
+	int hour;
+	int minute;
+	int second;
 	Date()
 	{
 		year = 2013;
 		month = 7;
 		day = 10;
+		setHMS();
 	}
 	Date(int year, int month, int day)
 	{
 		this->year = year;
 		this->month = month;
 		this->day = day;
+		setHMS();
 	}
+	Date(int year, int month, int day, int hour, int minute, int second)
+	{
+		this->year = year;
+		this->month = month;
+		this->day = day;
+		setHMS(hour, minute, second);
+		usingHMS = true;
+	}
+	bool IsUsingHMS() const
+	{
+		return usingHMS;
+	}
+	private:
+		bool usingHMS = false;
+		void setHMS(int hour = 0, int minute = 0, int second = 0)
+		{
+			this->hour = hour;
+			this->minute = minute;
+			this->second = second;
+		}
 };
 
 //9210??????????
@@ -111,10 +140,18 @@ public:
 
 	Vector2 dataRange[7];
 
+	int WIDTH;
+	int HEIGHT;
+
 public:
 	SatDataCloud(void);
 	void Init();
-	void Run(Date date, string satStr, string savePath, string saveName);
+	void Run(Date date, string satStr, string savePath, string saveName, int height, int width);
+
+	// my add to generate XML file used in vtk.js
+	void GenerateVolumeFile(const string& savePath, int startFrame, int endFrame);
+	bool WriteVTI(int length, int width, int height, const std::vector<float>& data, std::string& path);
+	// void ExportCloudXMLVolume(const std::vector<float> data, const std::string& savePath);
 
 	//position information
 	float center_theta;

@@ -23,8 +23,6 @@ using namespace std;
 #define RADIUS 1
 #define EARTH_RADIUS ((6378+6356)/2.0)
 
-#define WIDTH  512
-#define HEIGHT 512
 #define GEO_INTERVAL 15
 
 #define NFRAME 1

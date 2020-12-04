@@ -248,8 +248,15 @@ void SatDataCloud::ReadSatData(CString satStr, Date date, SatDataType channel) /
 	float* pData = new float[NFRAME * WIDTH * HEIGHT];
 	for (int i = 0; i < NFRAME; i++)
 	{
+
 		int hour = i / 2;
 		int minute = (i % 2) * 30;
+		if(date.IsUsingHMS()==true)
+		{
+			hour = date.hour;
+			minute = date.minute;
+		}
+
 		char str[256];
 		TimeChannel2FileName(satStr, str, date, hour, minute, channel);
 		ReadSingleSatData(str, pData + i * WIDTH * HEIGHT, channel, i);
@@ -317,12 +324,12 @@ void SatDataCloud::TimeChannel2FileName(CString satStr, char strFile[256], Date 
 	//FY2E_SEC_VIS_MLS_20120806_2200.AWX
 	CString filename;
 	filename = channelStr;
-	std::cout<<"filename : "<<filename<<endl;
+	// std::cout<<"filename : "<<filename<<endl;
 
 	CString str;
 	str.Format("%d", date.year);
 	filename += str;
-	std::cout<<"filename : "<<filename<<endl;
+	// std::cout<<"filename : "<<filename<<endl;
 
 	if (date.month < 10)
 	{
@@ -333,7 +340,7 @@ void SatDataCloud::TimeChannel2FileName(CString satStr, char strFile[256], Date 
 		str.Format("%d", date.month);
 	}
 	filename += str;
-	std::cout<<"filename : "<<filename<<endl;
+	// std::cout<<"filename : "<<filename<<endl;
 
 	if (date.day < 10)
 	{
@@ -344,7 +351,7 @@ void SatDataCloud::TimeChannel2FileName(CString satStr, char strFile[256], Date 
 		str.Format("%d_", date.day);
 	}
 	filename += str;
-	std::cout<<"filename : "<<filename<<endl;
+	// std::cout<<"filename : "<<filename<<endl;
 
 	if (hour < 10)
 	{
@@ -355,7 +362,7 @@ void SatDataCloud::TimeChannel2FileName(CString satStr, char strFile[256], Date 
 		str.Format("%d", hour);
 	}
 	filename += str;
-	std::cout<<"filename : "<<filename<<endl;
+	// std::cout<<"filename : "<<filename<<endl;
 
 	//switch (channel)
 	//{
@@ -386,7 +393,7 @@ void SatDataCloud::TimeChannel2FileName(CString satStr, char strFile[256], Date 
 		filename += "30.AWX";
 	}
 	filename = satStr + filename;
-	std::cout<<"filename : "<<filename<<endl;
+	// std::cout<<"filename : "<<filename<<endl;
 	//Cstring to char*
 	_tcscpy(_T(strFile), filename.GetBuffer(filename.GetLength()));
 }
@@ -951,8 +958,11 @@ void SatDataCloud::IntepImgData(int nframe, SatDataType channel, float* img_data
 //}
 
 // Render.cpp -> Run()部分
-void SatDataCloud::Run(Date date, string satStr, string savePath, string saveName) //No.41
+void SatDataCloud::Run(Date date, string satStr, string savePath, string saveName, int height, int width) //No.41
 {	
+	this->HEIGHT = height;
+	this->WIDTH = width;
+
 	ReadSatData(satStr.c_str(), date, VIS);
 	ReadSatData(satStr.c_str(), date, IR1);
 	ReadSatData(satStr.c_str(), date, IR2);
@@ -984,6 +994,10 @@ void SatDataCloud::Run(Date date, string satStr, string savePath, string saveNam
 	ComputeGeoThick();
 	//GenerateCloudParticlesFile(0,0,512,512,0, 1000);
 	GenerateCloudParticlesFile(savePath, saveName, 0, NFRAME);
+
+	string tmp = savePath + saveName;
+	GenerateVolumeFile(tmp, 0, NFRAME);
+
 	//GenerateExtinctionFieldFile(0, NFRAME, 256);
 	//GenerateCloudFiledFileEarth(0,NFRAME,512,512,128);
 	//GenerateCloudFieldIfoFile(0,1);
@@ -1981,6 +1995,7 @@ void SatDataCloud::ComputeGeoThick() //No.25
 	}
 }
 
+// 采样成粒子并保存
 void SatDataCloud::GenerateCloudParticlesFile(string savePath, string saveName, int startFrame, int endFrame)     //No.42
 {
 	float min_radius = 0.12;
@@ -2047,9 +2062,13 @@ void SatDataCloud::GenerateCloudParticlesFile(string savePath, string saveName, 
 						int count = 10;
 						while (cur_h > tempCBH && count--)
 						{
-							float  z = (earth_radius + cur_h) * cosf(th) * cos(ph);
-							float  x = (earth_radius + cur_h) * cosf(th) * sin(ph);
-							float  y = (earth_radius + cur_h) * sinf(th);
+							//float  z = (earth_radius + cur_h) * cosf(th) * cos(ph);
+							//float  x = (earth_radius + cur_h) * cosf(th) * sin(ph);
+							//float  y = (earth_radius + cur_h) * sinf(th);
+
+							float x = -5 + min_radius * i;
+							float y = -5 + min_radius * j;
+							float z = 5 + cur_h;
 
 							puffPosVec.push_back(Vector3(x, y, z));
 							puffColorVec.push_back(Color4(1, 1, 1, 1));
@@ -2108,6 +2127,141 @@ void SatDataCloud::ExportCloudModel(char* cloudfile)     //No.36
 		fwrite(&puffExtVec[i], sizeof(float), 1, fp);
 	}
 	fclose(fp);
+}
+
+
+void SatDataCloud::GenerateVolumeFile(const string& savePath, int startFrame, int endFrame)
+{
+	//int zaxis = (this->HEIGHT + this->WIDTH) / 8;
+	//int zaxis = (this->HEIGHT + this->WIDTH) / 2;
+	int zaxis =50;
+
+	float maxHeight = -MAXVAL;
+	float minHeight = MAXVAL;
+	float minExt = MAXVAL;
+	float maxExt = -MAXVAL;
+
+	float scale = 1;
+	float geo_delta = 0;
+	for (int nframe = startFrame; nframe < endFrame; nframe++)
+	{
+		for (int i = 0; i < HEIGHT; i++)
+		{
+			for (int j = 0; j < WIDTH; j++)
+			{
+				if (pixelTypeList[nframe * WIDTH * HEIGHT + WIDTH * i + j] > 0)
+				{
+					float cth = cthList[nframe * WIDTH * HEIGHT + WIDTH * i + j];
+					float cbh_scale = cth - geo_delta - scale * geo_thick_data[nframe * WIDTH * HEIGHT + WIDTH * i + j];
+
+					maxHeight = max(maxHeight, cth);
+					minHeight = min(minHeight, cbh_scale);
+
+					minExt = min(minExt, extinctionPlane[nframe * WIDTH * HEIGHT + WIDTH * i + j]);
+					maxExt = max(maxExt, extinctionPlane[nframe * WIDTH * HEIGHT + WIDTH * i + j]);
+				}
+
+			}
+		}
+	}
+	printf("MaxHeight: %f  -  MinHeight: %f  -  MaxExt: %f  -  MinExt: %f\n", maxHeight, minHeight, maxExt, minExt);
+	float normHeight = maxHeight - minHeight;
+	float normExt = maxExt - minExt;
+
+	long long size = (long long)HEIGHT * (long long)WIDTH * (long long)zaxis;
+	std:cout << "size :" << size << endl;
+	vector<float> volumeData(size, 0);
+
+	for (int nframe = startFrame; nframe < endFrame; nframe++)
+	{
+		for (int i = 0; i < HEIGHT; i++)
+		{
+			for (int j = 0; j < WIDTH; j++)
+			{
+				float cth = cthList[nframe * WIDTH * HEIGHT + WIDTH * i + j];
+				float cbh_scale = cth - geo_delta - scale * geo_thick_data[nframe * WIDTH * HEIGHT + WIDTH * i + j];
+
+				int qCth = min((int)(((cth - minHeight) / normHeight) * zaxis), zaxis);
+				int qCbh = max((int)(((cbh_scale - minHeight) / normHeight) * zaxis), 0);
+
+				float ext = (extinctionPlane[nframe * WIDTH * HEIGHT + WIDTH * i + j] - minExt) / normExt;
+
+				for (int k = 0; k < qCth; k++)
+				{
+					long long idx1 = (long long)HEIGHT * (long long)WIDTH * (long long)zaxis * nframe;
+					long long idx2 = (long long)WIDTH * (long long)zaxis * (long long)i;
+					long long idx3 = (long long)zaxis * (long long)j;
+					// std::cout << idx1 + idx2 + idx3 << " ";
+					volumeData[idx1 + idx2 + idx3 + k] = ext;
+				}
+			}
+		}
+	}
+
+	string tmp = savePath;
+	//WriteVTI(HEIGHT, WIDTH, zaxis, volumeData, tmp + "_HWZ");
+	//WriteVTI(HEIGHT, zaxis, WIDTH, volumeData, tmp + "_HZW");
+	//WriteVTI(WIDTH, HEIGHT, zaxis, volumeData, tmp + "_WHZ");
+	//WriteVTI(WIDTH, zaxis, HEIGHT, volumeData, tmp + "_WZH");
+	WriteVTI(zaxis-1, WIDTH-1, HEIGHT-1, volumeData, tmp + "_ZWH.vti");
+	//WriteVTI(zaxis, HEIGHT, WIDTH, volumeData, tmp + "_ZHW");
+}
+
+
+
+// 注意：这不是一个类成员函数
+// 将密度数据保存为.vti文件(ascii形式)(length，width，height：数据场长宽高；data：密度数据；path：文件保存路径)
+bool SatDataCloud::WriteVTI(int length, int width, int height, const std::vector<float>& data, std::string& path) {
+    std::ofstream file(path, std::ios::out | std::ios::trunc);
+    if (file) {
+        file << "<VTKFile type=\"ImageData\" version=\"1.0\" byte_order=\"";
+        // 判断大小端
+        int a = 1;
+        char* p = reinterpret_cast<char*>(&a);
+        if (*p == 1) {
+            file << "LittleEndian";
+        }
+        else {
+            file << "BigEndian";
+        }
+        file << "\" header_type=\"UInt64\">" << std::endl;
+
+        file << "<ImageData WholeExtent=\"" << "0 " << length << " 0 " << width << " 0 " << height
+            << "\" Origin=\"0 0 0\" Spacing=\"1.0 1.0 1.0\">" << std::endl;
+        file << "<Piece Extent=\"" << "0 " << length << " 0 " << width << " 0 " << height << "\">" << std::endl;
+        file << "<PointData Scalars=\"Scalars_\">" << std::endl;
+        float rangeMin = 1.0f;
+        float rangeMax = 0.0f;
+        for(float value:data) {
+            if(value < rangeMin) {
+                rangeMin = value;
+            }
+            if(value > rangeMax) {
+                rangeMax = value;
+            }
+        }
+        file << "<DataArray type=\"Float32\" Name=\"Scalars_\" format=\"ascii\" RangeMin=\""
+            << rangeMin << "\" RangeMax=\"" << rangeMax << "\">" << std::endl;
+        
+        for (float value : data) {
+            file << value << " ";
+        }
+
+        file << "</DataArray>" << std::endl;
+        file << "</PointData>" << std::endl;
+        file << "<CellData>" << std::endl;
+        file << "</CellData>" << std::endl;
+        file << "</Piece>" << std::endl;
+        file << "</ImageData>" << std::endl;
+        file << "</VTKFile>" << std::endl;
+        file.close();
+
+    }
+    else {
+        printf("Fail to save vti file: %s!\n", path.c_str());
+        return false;
+    }
+    return true;
 }
 
 // Draw部分
