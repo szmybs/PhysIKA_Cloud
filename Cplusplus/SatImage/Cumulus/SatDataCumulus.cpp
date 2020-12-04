@@ -17,42 +17,37 @@
 using namespace std;
 
 SatDataCloud::SatDataCloud(
-	string input_path,
-	string output_path,
-	string basemesh_folder,
-	string cloudmesh_folder,
-
-	int TOPLEFT_X = 3561,
-	int TOPLEFT_Y = 2063,
-	int REGION_WIDTH = 650,
-	int REGION_HEIGHT = 650,
-	double SCALE_EOFF = 30.0,
-	string LANDSAT_SCENE_ID = "LC81160482013179LGN01",
-	long long FILE_DATE = 20130628235849,
-	int YEAR = 2013,
-	int MONTH = 6,
-	int DAY = 28,
-	int HOUR = 2,
-	int MINUTE = 18,
-	int SECONDS = 35,
-	int LAND_AVG_TEMPERATURE = 283,
-	string SPACECRAFT_ID = "LANDSAT_8",
-	string SENSOR_ID = "OLI_TIRS",
-	int WRS_PATH = 116,
-	int WRS_ROW = 48,
-	string FILE_NAME_BAND_1 = "LC81160482013179LGN01_B1.TIF",
-	string FILE_NAME_BAND_2 = "LC81160482013179LGN01_B2.TIF",
-	string FILE_NAME_BAND_3 = "LC81160482013179LGN01_B3.TIF",
-	string FILE_NAME_BAND_4 = "LC81160482013179LGN01_B4.TIF",
-	string FILE_NAME_BAND_5 = "LC81160482013179LGN01_B5.TIF",
-	string FILE_NAME_BAND_6 = "LC81160482013179LGN01_B6.TIF",
-	string FILE_NAME_BAND_7 = "LC81160482013179LGN01_B7.TIF",
-	string FILE_NAME_BAND_8 = "LC81160482013179LGN01_B8.TIF",
-	string FILE_NAME_BAND_9 = "LC81160482013179LGN01_B9.TIF",
-	string FILE_NAME_BAND_10 = "LC81160482013179LGN01_B10.TIF",
-	string FILE_NAME_BAND_11 = "LC81160482013179LGN01_B11.TIF",
-	string FILE_NAME_BAND_QUALITY = "LC81160482013179LGN01_BQA.TIF",
-	string METADATA_FILE_NAME = "LC81160482013179LGN01_MTL.txt"
+	int TOPLEFT_X,
+	int TOPLEFT_Y,
+	int REGION_WIDTH,
+	int REGION_HEIGHT,
+	double SCALE_EOFF,
+	string LANDSAT_SCENE_ID,
+	long long FILE_DATE,
+	int YEAR,
+	int MONTH,
+	int DAY,
+	int HOUR,
+	int MINUTE,
+	int SECONDS,
+	int LAND_AVG_TEMPERATURE,
+	string SPACECRAFT_ID,
+	string SENSOR_ID,
+	int WRS_PATH,
+	int WRS_ROW,
+	string FILE_NAME_BAND_1,
+	string FILE_NAME_BAND_2,
+	string FILE_NAME_BAND_3,
+	string FILE_NAME_BAND_4,
+	string FILE_NAME_BAND_5,
+	string FILE_NAME_BAND_6,
+	string FILE_NAME_BAND_7,
+	string FILE_NAME_BAND_8,
+	string FILE_NAME_BAND_9,
+	string FILE_NAME_BAND_10,
+	string FILE_NAME_BAND_11,
+	string FILE_NAME_BAND_QUALITY,
+	string METADATA_FILE_NAME
 )
 {
 	this->TOPLEFT_X = TOPLEFT_X;
@@ -85,11 +80,6 @@ SatDataCloud::SatDataCloud(
 	this->FILE_NAME_BAND_11 = FILE_NAME_BAND_11;
 	this->FILE_NAME_BAND_QUALITY = FILE_NAME_BAND_QUALITY;
 	this->METADATA_FILE_NAME = METADATA_FILE_NAME;
-
-	this->input_path = input_path;
-	this->output_path = output_path;
-	this->basemesh_folder = basemesh_folder;
-	this->cloudmesh_folder = cloudmesh_folder;
 
 	SCALE = (max(this->REGION_WIDTH - 1, this->REGION_HEIGHT - 1) * SCALE_EOFF);
 }
@@ -217,8 +207,13 @@ SatDataCloud::~SatDataCloud(void)
 	//robustTestFile.close();
 }
 
-void SatDataCloud::Go(void)
+void SatDataCloud::Go(string input_path, string output_path, string basemesh_folder, string cloudmesh_folder)
 {
+	this->input_path = input_path;
+	this->output_path = output_path;
+	this->basemesh_folder = basemesh_folder;
+	this->cloudmesh_folder = cloudmesh_folder;
+
 	Init();
 	Modeling();
 	//ExportSatCloudIfo();

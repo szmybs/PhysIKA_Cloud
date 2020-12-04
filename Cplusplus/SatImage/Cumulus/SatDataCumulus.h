@@ -44,11 +44,7 @@ public:
 		string FILE_NAME_BAND_10 = "LC81160482013179LGN01_B10.TIF",
 		string FILE_NAME_BAND_11 = "LC81160482013179LGN01_B11.TIF",
 		string FILE_NAME_BAND_QUALITY = "LC81160482013179LGN01_BQA.TIF",
-		string METADATA_FILE_NAME = "LC81160482013179LGN01_MTL.txt",
-		string input_path = ".",
-		string output_path = "Cumulus_Output",
-		string basemesh_folder = "BaseMesh",
-		string cloudmesh_folder = "CloudMesh"
+		string METADATA_FILE_NAME = "LC81160482013179LGN01_MTL.txt"
 	);
 	~SatDataCloud(void);
 
@@ -84,6 +80,7 @@ private:
 	string FILE_NAME_BAND_11;
 	string FILE_NAME_BAND_QUALITY;
 	string METADATA_FILE_NAME;
+
 	string input_path;
 	string output_path;
 	string basemesh_folder;
@@ -92,7 +89,6 @@ private:
 private:
 	ofstream runIfoOut;
 	void Init();
-
 	void Modeling();
 
 	//input data
@@ -237,5 +233,5 @@ private:
 	Perlin* perlin;
 
 public:
-	void Go(void);
+	void Go(string input_path = ".", string output_path = "Cumulus_Output", string basemesh_folder = "BaseMesh", string cloudmesh_folder = "CloudMesh");
 };
