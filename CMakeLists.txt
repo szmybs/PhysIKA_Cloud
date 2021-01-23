@@ -13,10 +13,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CLOUD_SOURCE_DIR ${PROJECT_SOURCE_DIR})
 set(CLOUD_BINARY_DIR ${PROJECT_BINARY_DIR})
 
-set(CLOUD_INSTALL_DIR ${PROJECT_BINARY_DIR}/install)
-set(CLOUD_INSTALL_ARCHIVE_DIR ${CLOUD_INSTALL_DIR}/lib)
-set(CLOUD_INSTALL_LIBRARY_DIR ${CLOUD_INSTALL_DIR}/bin)
-set(CLOUD_INSTALL_INCLUDE_DIR ${CLOUD_INSTALL_DIR}/include)
+set(CLOUD_INSTALL_PREFIX ${PROJECT_BINARY_DIR}/install)
+set(CLOUD_INSTALL_ARCHIVE_DIR ${CLOUD_INSTALL_PREFIX}/lib)
+set(CLOUD_INSTALL_LIBRARY_DIR ${CLOUD_INSTALL_PREFIX}/bin)
+set(CLOUD_INSTALL_INCLUDE_DIR ${CLOUD_INSTALL_PREFIX}/include)
 
 
 # import OpenCV part
@@ -36,6 +36,7 @@ if(WIN32)
                     -DWITH_OPENCL=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_opencv_apps=OFF -DBUILD_ZLIB=OFF -DBUILD_opencv_apps=OFF -DBUILD_opencv_calib3d=OFF 
                     -DBUILD_opencv_features2d=OFF -DBUILD_opencv_flann=OFF -DBUILD_opencv_objdetect=OFF -DBUILD_opencv_video=OFF -DBUILD_opencv_superes=OFF 
                     -DBUILD_opencv_ml=OFF -DBUILD_opencv_photo=OFF -DWITH_FFMPEG=OFF
+                    -A x64
         COMMAND ${CMAKE_COMMAND} --build ${CLOUD_OpenCV_BINARY_DIR} --config $<$<CONFIG:>:Undefined>$<$<NOT:$<CONFIG:>>:$<CONFIG>>
         COMMAND ${CMAKE_COMMAND} --install ${CLOUD_OpenCV_BINARY_DIR} --config $<$<CONFIG:>:Undefined>$<$<NOT:$<CONFIG:>>:$<CONFIG>>
     )

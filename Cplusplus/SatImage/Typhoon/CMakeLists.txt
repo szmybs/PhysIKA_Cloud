@@ -2,19 +2,22 @@ PROJECT(SatImageTyphoon)
 
 cmake_minimum_required(VERSION 3.12)
 
-aux_source_directory(. SRC_LIST)
-add_library(${PROJECT_NAME} STATIC ${SRC_LIST})
 
-# message("${OPENCV_CONFIG_DIR}")
-# find_package(OpenCV REQUIRED CONFIG PATHS ${OPENCV_CONFIG_DIR})
+aux_source_directory(. SRC_LIST)
+add_library(${PROJECT_NAME} ${SRC_LIST})
 
 include_directories(
-        ${SatImage_SOURCE_DIR}
+    ${SatImage_SOURCE_DIR}
 )
 
-target_link_libraries(${PROJECT_NAME} ${CLOUD_OpenCV_LIB_DIR}/*.lib SatImageUtility)
+target_link_libraries(
+    ${PROJECT_NAME} 
+    SatImageUtility
+    CLOUD_OpenCV
+)
 
 install(
     TARGETS ${PROJECT_NAME}
-    ARCHIVE DESTINATION ${SatImage_INSTALL_LIB_DIR}
+    # CONFIGURATIONS Debug
+    ARCHIVE DESTINATION ${CLOUD_INSTALL_ARCHIVE_DIR}
 )
