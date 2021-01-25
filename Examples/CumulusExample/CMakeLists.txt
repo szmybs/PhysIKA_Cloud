@@ -1,6 +1,7 @@
 project(CumulusExample)
 
 add_executable(${PROJECT_NAME} main.cpp)
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")
 
 target_link_libraries(
     ${PROJECT_NAME}
@@ -21,3 +22,9 @@ if(WIN32)
                     $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release>
     )
 endif()
+
+install(
+    TARGETS ${PROJECT_NAME}
+    CONFIGURATIONS Debug
+    RUNTIME DESTINATION Debug/bin
+)

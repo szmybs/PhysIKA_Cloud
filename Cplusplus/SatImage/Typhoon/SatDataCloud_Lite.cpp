@@ -46,6 +46,11 @@ SatDataCloud::SatDataCloud(void)
 	center_phi = 130 * M_PI / 180;
 
 	perlin = new Perlin(4, 4, 1, 94);
+
+	// SatDate初始化，权宜之计
+	SatDate.year = -1;
+	SatDate.month = -1;
+	SatDate.day = -1;
 }
 
 SatDataCloud::~SatDataCloud(void)
@@ -197,9 +202,12 @@ int SatDataCloud::CreateSunZenithAzimuthIfo(Date date)     //No.19 == No.21
 		tempAltitudeTable.push_back(altitudeTable[i]);
 	}
 
-	int year=date.year;
-	int month=date.month;
-	int day=date.day;	
+	// int year=date.year;
+	// int month=date.month;
+	// int day=date.day;
+	int year = SatDate.year;
+	int month = SatDate.month;
+	int day = SatDate.day;	
 	int second=0;
 	int offset=0;
 	int width=WIDTH;
@@ -219,11 +227,10 @@ int SatDataCloud::CreateSunZenithAzimuthIfo(Date date)     //No.19 == No.21
 			}
 		}
 	}
-
-	FILE* fp=NULL;
-	fp = fopen("sunZenithAzimuth.dat", "wb");
-	fwrite(sunZenithAzimuth_mat,sizeof(float ),WIDTH*HEIGHT*2*NFRAME,fp);
-	fclose(fp);
+	// FILE* fp=NULL;
+	// fp = fopen("sunZenithAzimuth.dat", "wb");
+	// fwrite(sunZenithAzimuth_mat,sizeof(float ),WIDTH*HEIGHT*2*NFRAME,fp);
+	// fclose(fp);
 	return 1;
 }
 
@@ -462,6 +469,13 @@ bool SatDataCloud::ReadSingleSatData(char* filename, float* pData, SatDataType c
 	fread(&(secondHead.iDataLengthOfCalibration), sizeof(short int), 1, fp);
 	fread(&(secondHead.iDataLengthOfGeolocation), sizeof(short int), 1, fp);
 	fread(&(secondHead.iReserved), sizeof(short int), 1, fp);
+
+	if(SatDate.year == -1)
+	{
+		SatDate.year = secondHead.iYear;
+		SatDate.month = secondHead.iMonth;
+		SatDate.day = secondHead.iDay;
+	}
 
 	if (secondHead.iDataLengthOfColorTable != 0)
 	{
@@ -972,7 +986,8 @@ void SatDataCloud::Run(Date date, string satStr, string savePath, string saveNam
 	CreateLongLatTable();
 	CreateAltitudeTable();
 	CreateSatZenithAzimuthIfo();
-	CreateSunZenithAzimuthIfo(date); //CreateSunZenithAzimuthIfo(Date(2013,7,10));
+	// CreateSunZenithAzimuthIfo(date); //CreateSunZenithAzimuthIfo(Date(2013,7,10));
+	CreateSunZenithAzimuthIfo(Date(2013,7,10));   // 使用随便一个Date以适配参数，实际不使用
 	//CreateSunZenithAzimuthIfoFromFile("sunZenithAzimuth.dat");
 
 	//ReadSatData(Date(2013, 7, 10), VIS);
@@ -993,7 +1008,7 @@ void SatDataCloud::Run(Date date, string satStr, string savePath, string saveNam
 	ComputeCloudProperties_MEA();
 	ComputeGeoThick();
 	//GenerateCloudParticlesFile(0,0,512,512,0, 1000);
-	GenerateCloudParticlesFile(savePath, saveName, 0, NFRAME);
+	//GenerateCloudParticlesFile(savePath, saveName, 0, NFRAME);
 
 	string tmp = savePath + saveName;
 	GenerateVolumeFile(tmp, 0, NFRAME);
@@ -1405,7 +1420,8 @@ void SatDataCloud::CreateGroundTemperatureTable(CString satStr, Date startDate, 
 		for (int day = 0; day < 15; day++)
 		{
 			//Attention: A more accurate version should be given.
-			Date date = startDate;
+			// Date date = startDate;
+			Date date = SatDate;
 			date.day += day;
 			if (date.day > 30)
 			{
@@ -2199,17 +2215,12 @@ void SatDataCloud::GenerateVolumeFile(const string& savePath, int startFrame, in
 	}
 
 	string tmp = savePath;
-	//WriteVTI(HEIGHT, WIDTH, zaxis, volumeData, tmp + "_HWZ");
-	//WriteVTI(HEIGHT, zaxis, WIDTH, volumeData, tmp + "_HZW");
-	//WriteVTI(WIDTH, HEIGHT, zaxis, volumeData, tmp + "_WHZ");
-	//WriteVTI(WIDTH, zaxis, HEIGHT, volumeData, tmp + "_WZH");
-	WriteVTI(zaxis-1, WIDTH-1, HEIGHT-1, volumeData, tmp + "_ZWH.vti");
-	//WriteVTI(zaxis, HEIGHT, WIDTH, volumeData, tmp + "_ZHW");
+	// WriteVTI(zaxis-1, WIDTH-1, HEIGHT-1, volumeData, tmp + "_ZWH.vti");
+	WriteVTI(zaxis-1, WIDTH-1, HEIGHT-1, volumeData, tmp + ".vti");
 }
 
 
 
-// 注意：这不是一个类成员函数
 // 将密度数据保存为.vti文件(ascii形式)(length，width，height：数据场长宽高；data：密度数据；path：文件保存路径)
 bool SatDataCloud::WriteVTI(int length, int width, int height, const std::vector<float>& data, std::string& path) {
     std::ofstream file(path, std::ios::out | std::ios::trunc);

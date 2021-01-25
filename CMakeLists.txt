@@ -1,22 +1,27 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.12)
 include(ExternalProject)
 
 project(Physika_Cloud)
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON) 
 
-# 如果没在PhySIKA目录下
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+IF(MSVC)
+    SET( CMAKE_DEBUG_POSTFIX "d" )
+ENDIF(MSVC)
 
 
 set(CLOUD_SOURCE_DIR ${PROJECT_SOURCE_DIR})
 set(CLOUD_BINARY_DIR ${PROJECT_BINARY_DIR})
 
-set(CLOUD_INSTALL_PREFIX ${PROJECT_BINARY_DIR}/install)
-set(CLOUD_INSTALL_ARCHIVE_DIR ${CLOUD_INSTALL_PREFIX}/lib)
-set(CLOUD_INSTALL_LIBRARY_DIR ${CLOUD_INSTALL_PREFIX}/bin)
-set(CLOUD_INSTALL_INCLUDE_DIR ${CLOUD_INSTALL_PREFIX}/include)
+
+# 如果没在PhySIKA目录下
+if(${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR})
+    set(CMAKE_INSTALL_PREFIX ${CLOUD_BINARY_DIR}/install CACHE PATH ${CLOUD_BINARY_DIR} FORCE)
+
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+endif()
 
 
 # import OpenCV part
@@ -27,8 +32,12 @@ set(CLOUD_OpenCV_INCLUDE_DIR ${CLOUD_OpenCV_SOURCE_DIR}/install-include)
 set(CLOUD_OpenCV_LIB_DIR ${CLOUD_OpenCV_BINARY_DIR}/install/lib)
 set(CLOUD_OpenCV_BIN_DIR ${CLOUD_OpenCV_BINARY_DIR}/install/bin)
 
-if(WIN32)
+if(UNIX)
+    message("UNIX")
+elseif(WIN32)
     add_library(CLOUD_OpenCV ${CLOUD_SOURCE_DIR}/Extern/opencv_interface.cpp)
+    set_target_properties(CLOUD_OpenCV PROPERTIES FOLDER "ExternalProjectTargets")
+
     add_custom_command(
         TARGET CLOUD_OpenCV
         PRE_BUILD
@@ -127,10 +136,10 @@ endif()
 
 
 ## physika_cloud part
-set(CLOUD_PYTHON_SOURCE_PATH ${PROJECT_SOURCE_DIR}/Python)
-set(PYBIND11_DIR ${PROJECT_SOURCE_DIR}/Extern/pybind11)
+set(CLOUD_PYTHON_SOURCE_PATH ${CLOUD_SOURCE_DIR}/Python)
+set(PYBIND11_DIR ${CLOUD_SOURCE_DIR}/Extern/pybind11)
 
-set(CLOUD_Eigen_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/Extern/Eigen-3.3.7)
+set(CLOUD_Eigen_INCLUDE_DIR ${CLOUD_SOURCE_DIR}/Extern/Eigen-3.3.7)
 
 
 include_directories(
@@ -145,10 +154,16 @@ include_directories(
 )
 
 
-# add_subdirectory(./Extern)
-add_subdirectory(./Cplusplus)
+option(CLOUD_PYTHON "option for python interface" OFF)
+if(CLOUD_PYTHON)
+    add_subdirectory(./Extern)
+endif()
+
+
+add_subdirectory(${CLOUD_SOURCE_DIR}/Cplusplus)
+
 
 option(CLOUD_EXAMPLES "option for cloud examples" ON)
 if(CLOUD_EXAMPLES)
-    add_subdirectory(./Examples)
+    add_subdirectory(${CLOUD_SOURCE_DIR}/Examples)
 endif()

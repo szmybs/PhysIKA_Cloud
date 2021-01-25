@@ -143,6 +143,8 @@ public:
 	int WIDTH;
 	int HEIGHT;
 
+	Date SatDate;
+
 public:
 	SatDataCloud(void);
 	void Init();

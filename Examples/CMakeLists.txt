@@ -8,5 +8,5 @@ include_directories(
     ${CLOUD_SOURCE_DIR}/Cplusplus/CloudEulerGen
 )
 
-# add_subdirectory(./TyphoonExample)
-add_subdirectory(./CumulusExample)
+add_subdirectory(./TyphoonExample)
+#add_subdirectory(./CumulusExample)
