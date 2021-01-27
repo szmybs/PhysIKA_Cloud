@@ -131,7 +131,59 @@ endif()
 
 
 
+# import netCDF-C
+# 未完成
+set(CLOUD_netCDF_ROOT ${CLOUD_SOURCE_DIR}/Extern/netCDF-4.7.4)
+include_directories(
+    ${CLOUD_netCDF_ROOT}/include
+)
+
+
+
 # import OpenMesh part
+set(CLOUD_OpenMesh_SOURCE_DIR ${CLOUD_SOURCE_DIR}/Extern/OpenMesh-8.1)
+set(CLOUD_OpenMesh_BINARY_DIR ${CLOUD_BINARY_DIR}/Extern/openMesh-8.1/build)
+
+set(CLOUD_OpenMesh_INCLUDE_DIR ${CLOUD_OpenMesh_SOURCE_DIR}/install-include)
+set(CLOUD_OpenMesh_LIB_DIR ${CLOUD_OpenMesh_BINARY_DIR}/install/lib)
+
+if(UNIX)
+    message("UNIX")
+elseif(WIN32)
+    add_library(CLOUD_OpenMesh ${CLOUD_SOURCE_DIR}/Extern/openmesh_interface.cpp)
+    set_target_properties(CLOUD_OpenMesh PROPERTIES FOLDER "ExternalProjectTargets")
+
+    add_custom_command(
+        TARGET CLOUD_OpenMesh
+        PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -S ${CLOUD_OpenMeshSOURCE_DIR} -B ${CLOUD_OpenMesh_BINARY_DIR} -DBUILD_APPS=OFF -DOPENMESH_BUILD_SHARED=OFF -DOPENMESH_DOCS=OFF
+                    -DOPENMESH_BUILD_UNIT_TESTS=OFF -A x64
+        COMMAND ${CMAKE_COMMAND} --build ${CLOUD_OpenMesh_BINARY_DIR} --config $<$<CONFIG:>:Undefined>$<$<NOT:$<CONFIG:>>:$<CONFIG>>
+        COMMAND ${CMAKE_COMMAND} --install ${CLOUD_OpenMesh_BINARY_DIR} --config $<$<CONFIG:>:Undefined>$<$<NOT:$<CONFIG:>>:$<CONFIG>>
+    )
+
+    set(cloud_openmesh_libs
+        OpenMeshCore
+        OpenMeshTools
+    )
+
+    set(cloud_openmesh_link_list "")
+
+    foreach(lib ${cloud_openmesh_libs})
+        add_library(${lib} SHARED IMPORTED)
+        set_target_properties(${lib} PROPERTIES 
+            IMPORTED_IMPLIB_DEBUG "${CLOUD_OpenMesh_LIB_DIR}/${lib}d.lib"
+        )
+        set_target_properties(${lib} PROPERTIES 
+            IMPORTED_IMPLIB_RELEASE "${CLOUD_OpenMesh_LIB_DIR}/${lib}.lib"
+        )
+        list(APPEND cloud_openmesh_link_list ${lib})
+    endforeach()
+
+    target_link_libraries(CLOUD_OpenMesh
+        ${cloud_openmesh_libs}
+    )
+endif()
 
 
 
@@ -146,6 +198,8 @@ include_directories(
     ${CLOUD_OpenCV_INCLUDE_DIR}
 
     ${CLOUD_Eigen_INCLUDE_DIR}
+
+    ${CLOUD_OpenMesh_INCLUDE_DIR}
     
     ${CLOUD_CGAL_INCLUDE_DIR}
     ${CLOUD_BOOST_ROOT}
@@ -156,7 +210,7 @@ include_directories(
 
 option(CLOUD_PYTHON "option for python interface" OFF)
 if(CLOUD_PYTHON)
-    add_subdirectory(./Extern)
+    add_subdirectory(${CLOUD_SOURCE_DIR}/Extern)
 endif()
 
 

@@ -3,4 +3,9 @@ if(CLOUD_EULER)
     add_subdirectory(./CloudEulerGen)
 endif()
 
+
+add_subdirectory(./WRF)
+
 add_subdirectory(./SatImage)
+
+add_subdirectory(./Image)
