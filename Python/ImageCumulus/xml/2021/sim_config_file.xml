@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Scene name="场景">
+    <Fluid class="" name="流体">
+        <Start class="Vector2f" disabled="false" name="起始位置">30 30</Start>
+        <End class="Vector2f" disabled="false" name="结束位置">34 34</End>
+        <Vortex class="Real" disabled="false" name="涡旋抑制系数">0.7</Vortex>
+        <Noise class="Enum" disabled="true" enum="无噪声 高斯噪声" name="源噪声">0</Noise>
+    </Fluid>
+    <Boundary class="" name="边界">
+        <Domain class="" name="模拟域">
+            <Scale class="Real" disabled="false" name="大小">64</Scale>
+            <IsStatic class="Bool" disabled="true" name="是否静止">true</IsStatic>
+        </Domain>
+    </Boundary>
+    <Simulation class="" name="模拟">
+        <SimulationMethod class="Enum" disabled="false" enum="烟 云" name="仿真类型">0</SimulationMethod>
+        <Gravity class="Vector3f" disabled="true" name="重力">0.0 -9.8 0.0</Gravity>
+        <CFLMethod class="Bool" disabled="true" name="使用CFL条件">true</CFLMethod>
+        <Frame class="Unsigned" disabled="false" name="模拟帧数">5</Frame>
+    </Simulation>
+    <Upload class="" name="用户上传">
+        <File class="File" disabled="false" name="图片文件" type="image">0-250.png</File>
+    </Upload>
+    <SimulationRun name="模拟运行结果">
+        <FileName name="仿真文件名">cloud</FileName>
+        <FrameSum name="帧总数">1</FrameSum>
+        <Animation name="是否支持动画">false</Animation>
+        <Item name="太阳颜色">0.888 0.958 0.920</Item>
+        <Item name="图像宽高">256 256</Item>
+        <Item name="顶点数">2054</Item>
+        <Item name="面数">4104</Item>
+    </SimulationRun>
+</Scene>

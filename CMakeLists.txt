@@ -24,6 +24,7 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR})
 endif()
 
 
+
 # import OpenCV part
 set(CLOUD_OpenCV_SOURCE_DIR ${CLOUD_SOURCE_DIR}/Extern/opencv-2.4.13)
 set(CLOUD_OpenCV_BINARY_DIR ${CLOUD_BINARY_DIR}/Extern/opencv-2.4.13/build)
@@ -156,10 +157,11 @@ elseif(WIN32)
     add_custom_command(
         TARGET CLOUD_OpenMesh
         PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -S ${CLOUD_OpenMeshSOURCE_DIR} -B ${CLOUD_OpenMesh_BINARY_DIR} -DBUILD_APPS=OFF -DOPENMESH_BUILD_SHARED=OFF -DOPENMESH_DOCS=OFF
+        COMMAND ${CMAKE_COMMAND} -S ${CLOUD_OpenMesh_SOURCE_DIR} -B ${CLOUD_OpenMesh_BINARY_DIR} -DBUILD_APPS=OFF -DOPENMESH_BUILD_SHARED=OFF -DOPENMESH_DOCS=OFF
                     -DOPENMESH_BUILD_UNIT_TESTS=OFF -A x64
         COMMAND ${CMAKE_COMMAND} --build ${CLOUD_OpenMesh_BINARY_DIR} --config $<$<CONFIG:>:Undefined>$<$<NOT:$<CONFIG:>>:$<CONFIG>>
-        COMMAND ${CMAKE_COMMAND} --install ${CLOUD_OpenMesh_BINARY_DIR} --config $<$<CONFIG:>:Undefined>$<$<NOT:$<CONFIG:>>:$<CONFIG>>
+        COMMAND ${CMAKE_COMMAND} --install ${CLOUD_OpenMesh_BINARY_DIR} --prefix ${CLOUD_OpenMesh_BINARY_DIR}/install
+                                 --config $<$<CONFIG:>:Undefined>$<$<NOT:$<CONFIG:>>:$<CONFIG>>
     )
 
     set(cloud_openmesh_libs
@@ -208,9 +210,19 @@ include_directories(
 )
 
 
+
 option(CLOUD_PYTHON "option for python interface" OFF)
 if(CLOUD_PYTHON)
     add_subdirectory(${CLOUD_SOURCE_DIR}/Extern)
+
+    # 借用OpenCV作为锚点
+    add_custom_command(
+        TARGET CLOUD_OpenCV
+        PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory 
+                    ${CLOUD_SOURCE_DIR}/Python/
+                    ${CLOUD_BINARY_DIR}/Python/
+    )
 endif()
 
 
