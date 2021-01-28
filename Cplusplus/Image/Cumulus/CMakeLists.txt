@@ -5,6 +5,7 @@ SET(CMAKE_DEBUG_POSTFIX "")
 
 add_definitions(-D_USE_MATH_DEFINES) 
 
+
 aux_source_directory(. SRC_LIST)
 if(CLOUD_PYTHON)
     pybind11_add_module(${PROJECT_NAME} ${SRC_LIST})
@@ -13,7 +14,9 @@ else()
     add_library(${PROJECT_NAME} STATIC ${SRC_LIST})
 endif()
 
+
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Image")
+
 
 target_link_libraries(
     ${PROJECT_NAME}
@@ -21,6 +24,7 @@ target_link_libraries(
     PRIVATE CLOUD_OpenCV
     PRIVATE CLOUD_GMP
 )
+
 
 if(WIN32)
     add_custom_command(
@@ -40,6 +44,7 @@ elseif(UNIX)
     message("UNIX")
 endif()
 
+
 if(CLOUD_PYTHON)
     install(
         TARGETS ${PROJECT_NAME}
@@ -48,7 +53,13 @@ if(CLOUD_PYTHON)
 else()
     install(
         TARGETS ${PROJECT_NAME}
-        ARCHIVE DESTINATION lib
+        CONFIGURATIONS Debug
+        ARCHIVE DESTINATION lib/Debug
+    )
+    install(
+        TARGETS ${PROJECT_NAME}
+        CONFIGURATIONS Release
+        ARCHIVE DESTINATION lib/Release
     )
 endif()
 

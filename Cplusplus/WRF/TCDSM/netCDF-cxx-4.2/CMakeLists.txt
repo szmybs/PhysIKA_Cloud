@@ -9,8 +9,21 @@ set(SRC_LIST
 )
 
 add_library(${PROJECT_NAME} STATIC ${SRC_LIST})
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "WRF")
 
 target_link_libraries(
     ${PROJECT_NAME}
-    ${netCDF_LIBRARIES}
+    ${CLOUD_netCDF_LIBS}
+)
+
+
+install(
+    TARGETS ${PROJECT_NAME}
+    CONFIGURATIONS Debug
+    ARCHIVE DESTINATION lib/Debug
+)
+install(
+    TARGETS ${PROJECT_NAME}
+    CONFIGURATIONS Release
+    ARCHIVE DESTINATION lib/Release
 )

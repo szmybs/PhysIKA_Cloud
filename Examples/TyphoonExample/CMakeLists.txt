@@ -8,5 +8,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")
 install(
     TARGETS ${PROJECT_NAME}
     CONFIGURATIONS Debug
-    RUNTIME DESTINATION Debug/bin
+    RUNTIME DESTINATION bin/Debug
+)
+install(
+    TARGETS ${PROJECT_NAME}
+    CONFIGURATIONS Release
+    RUNTIME DESTINATION bin/Release
 )

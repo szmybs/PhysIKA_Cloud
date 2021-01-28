@@ -134,10 +134,31 @@ endif()
 
 # import netCDF-C
 # 未完成
-set(CLOUD_netCDF_ROOT ${CLOUD_SOURCE_DIR}/Extern/netCDF-4.7.4)
-include_directories(
-    ${CLOUD_netCDF_ROOT}/include
-)
+if(WIN32)
+    set(CLOUD_netCDF_ROOT ${CLOUD_SOURCE_DIR}/Extern/netCDF-4.7.4)
+    include_directories(
+        ${CLOUD_netCDF_ROOT}/include
+    )
+
+    file(GLOB CLOUD_netCDF_LIBS ${CLOUD_netCDF_ROOT}/lib/*.lib)
+    file(GLOB CLOUD_netCDF_DLLS ${CLOUD_netCDF_ROOT}/bin/*.dll)
+    # message("${CLOUD_netCDF_LIBS}")
+endif()
+
+
+
+# import osg
+option(USE_PREBUILT_OSG "option for OpenSceneGraph Windows Binaries" ON)
+if(USE_PREBUILT_OSG)
+    set(CLOUD_OSG_ROOT ${CLOUD_SOURCE_DIR}/Extern/OpenSceneGraph-3.6.4-VC2017-64-Debug)
+    include_directories(
+        ${CLOUD_OSG_ROOT}/include
+    )
+
+    file(GLOB CLOUD_OSG_LIBS ${CLOUD_OSG_ROOT}/lib/*.lib)
+    file(GLOB CLOUD_OSG_DLLS ${CLOUD_OSG_ROOT}/bin/*.dll)
+endif()
+
 
 
 
@@ -228,8 +249,4 @@ endif()
 
 add_subdirectory(${CLOUD_SOURCE_DIR}/Cplusplus)
 
-
-option(CLOUD_EXAMPLES "option for cloud examples" OFF)
-if(CLOUD_EXAMPLES)
-    add_subdirectory(${CLOUD_SOURCE_DIR}/Examples)
-endif()
+add_subdirectory(${CLOUD_SOURCE_DIR}/Examples)

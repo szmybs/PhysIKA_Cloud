@@ -21,19 +21,28 @@ SET(TARGET_SRC
 )
 
 add_library(${PROJECT_NAME} SHARED ${TARGET_H} ${TARGET_SRC})
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "WRF/TCDSM")
 
 target_link_libraries(
     ${PROJECT_NAME}
-    PRIVATE tcdsmUtil
+    tcdsmUtil
     netCDFCxx-4.2
-    ${OPENSCENEGRAPH_LIBRARIES}
+    # PRIVATE tcdsmUtil
+    # ${CLOUD_OSG_LIBS}
 )
 
 install(
-        TARGETS ${PROJECT_NAME}
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION bin
-        RUNTIME DESTINATION bin
+    TARGETS ${PROJECT_NAME}
+    CONFIGURATIONS Debug
+    ARCHIVE DESTINATION lib/Debug
+    LIBRARY DESTINATION bin/Debug
+    RUNTIME DESTINATION bin/Debug
 )
-
+install(
+    TARGETS ${PROJECT_NAME}
+    CONFIGURATIONS Release
+    ARCHIVE DESTINATION lib/Release
+    LIBRARY DESTINATION bin/Release
+    RUNTIME DESTINATION bin/Release
+)
 
