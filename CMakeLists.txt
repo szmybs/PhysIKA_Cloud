@@ -229,7 +229,7 @@ endif()
 add_subdirectory(${CLOUD_SOURCE_DIR}/Cplusplus)
 
 
-option(CLOUD_EXAMPLES "option for cloud examples" ON)
+option(CLOUD_EXAMPLES "option for cloud examples" OFF)
 if(CLOUD_EXAMPLES)
     add_subdirectory(${CLOUD_SOURCE_DIR}/Examples)
 endif()
