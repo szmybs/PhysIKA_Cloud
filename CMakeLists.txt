@@ -149,16 +149,30 @@ endif()
 
 # import osg
 option(USE_PREBUILT_OSG "option for OpenSceneGraph Windows Binaries" ON)
-if(USE_PREBUILT_OSG)
-    set(CLOUD_OSG_ROOT ${CLOUD_SOURCE_DIR}/Extern/OpenSceneGraph-3.6.4-VC2017-64-Debug)
-    include_directories(
-        ${CLOUD_OSG_ROOT}/include
-    )
+option(CLOUD_WRF "option for wrf" OFF)
 
-    file(GLOB CLOUD_OSG_LIBS ${CLOUD_OSG_ROOT}/lib/*.lib)
-    file(GLOB CLOUD_OSG_DLLS ${CLOUD_OSG_ROOT}/bin/*.dll)
+if(USE_PREBUILT_OSG AND CLOUD_WRF)
+    if(WIN32)
+        set(CLOUD_OSG_ROOT ${CLOUD_SOURCE_DIR}/Extern/OpenSceneGraph-3.6.4-VC2017-64-Debug)
+        include_directories(
+            ${CLOUD_OSG_ROOT}/include
+        )
+
+        file(GLOB CLOUD_OSG_LIBS ${CLOUD_OSG_ROOT}/lib/*.lib)
+        file(GLOB CLOUD_OSG_DLLS ${CLOUD_OSG_ROOT}/bin/*.dll)
+    endif()
+elseif(NOT USE_PREBUILT_OSG AND CLOUD_WRF)
+    if(WIN32)
+        # set(CLOUD_OSG_DLLS "")
+        # set(CLOUD_OSG_SOURCE_DIR ${CLOUD_SOURCE_DIR}/Extern/OpenSceneGraph-3.6.5)
+        # set(CLOUD_OSG_BINARY_DIR ${CLOUD_BINARY_DIR}/Extern/OpenSceneGraph-3.6.5/build)
+        # include_directories(
+        #     ${CLOUD_OSG_SOURCE_DIR}/include
+        #     ${CLOUD_OSG_BINARY_DIR}/include
+        # )
+        include(${CLOUD_SOURCE_DIR}/OpenSceneGraph.cmake)
+    endif()
 endif()
-
 
 
 

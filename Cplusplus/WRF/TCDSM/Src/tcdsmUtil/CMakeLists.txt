@@ -15,10 +15,17 @@ SET(TARGET_SRC
 add_library(${PROJECT_NAME} SHARED ${TARGET_H} ${TARGET_SRC})
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "WRF/TCDSM")
 
-target_link_libraries(
-    ${PROJECT_NAME}
-    ${CLOUD_OSG_LIBS}
-)
+if(USE_PREBUILT_OSG)
+    target_link_libraries(
+        ${PROJECT_NAME}
+        ${CLOUD_OSG_LIBS}
+    )
+else()
+    target_link_libraries(
+        ${PROJECT_NAME}
+        CLOUD_OSG
+    )
+endif()
 
 
 
