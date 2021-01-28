@@ -6,6 +6,7 @@ set(SatImage_BINARY_DIR ${PROJECT_BINARY_DIR})
 option(CLOUD_SAT_CUMULUS "option for satimage cumulus" OFF)
 option(CLOUD_SAT_TYPHOON "option for satimage typhoon" OFF)
 
+
 if(CLOUD_SAT_CUMULUS OR CLOUD_SAT_TYPHOON)
     add_subdirectory(Utility)
 endif()

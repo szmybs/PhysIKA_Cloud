@@ -8,7 +8,7 @@
 
 4. Configure选项：
 	1. CLOUD_EULER    欧拉法
-	2. CLOUD_EXAMPLES    C++样例
+	2. CLOUD_EXAMPLES    C++样例（仅在其他项勾选下勾选此项）
 	3. CLOUD_PYTHON    python接口
 	4. CLOUD_IMG_CUMULUS    RGB图像生成积云
 	5. CLOUD_SAT_CUMULUS    卫星云图生成积云（不在项目计划内）

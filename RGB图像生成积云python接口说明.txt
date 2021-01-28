@@ -8,6 +8,7 @@ D:\Code\PhysIKA_Cloud\Python\ImageCumulus\xml\2021\
 D:\Code\PhysIKA_Cloud\Python\ImageCumulus\xml\2021\sim_data\
 
 
+
 注：
 1. 代码运行时会在C++工程的上级目录中的output文件夹（../output/xxxxx）里存放临时文件，如果output文件夹不存在则无法正常运行。
 2. natural_img文件夹中的6张图片经过测试能跑出正常效果。

@@ -22,7 +22,6 @@ target_link_libraries(
     PRIVATE CLOUD_GMP
 )
 
-
 if(WIN32)
     add_custom_command(
         TARGET ${PROJECT_NAME}
@@ -40,7 +39,6 @@ if(WIN32)
 elseif(UNIX)
     message("UNIX")
 endif()
-
 
 if(CLOUD_PYTHON)
     install(
