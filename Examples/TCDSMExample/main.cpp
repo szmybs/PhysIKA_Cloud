@@ -12,10 +12,9 @@ int main(int argc,char ** argv)
 {
     SimpleModeler modeler;
 
-    modeler.setNetCDFFile("D:\\Code\\LiYang\\TCDSM-MY\\NCData\\TC_07.nc");
-    modeler.setModelSavePath("./");
+    modeler.setNetCDFFile("D:\\Code\\LiYang\\TCDSM-MY\\NCData\\TC_07.nc");  // 输入的WRF数据
+    modeler.setModelSavePath("./");                                         // 输出路径
 
     modeler.setDefault();
-
     modeler.execute();
 }
