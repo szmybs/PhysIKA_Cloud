@@ -148,6 +148,7 @@ public:
 public:
 	SatDataCloud(void);
 	void Init();
+	void Run(const vector<string>& typName, const string& savePath, const string& saveName, int height, int width);
 	void Run(Date date, string satStr, string savePath, string saveName, int height, int width);
 
 	// my add to generate XML file used in vtk.js
@@ -188,12 +189,14 @@ public:
 
 	bool ReadSingleSatData(char* filename, float* pData, SatDataType channel, int nframe);
 	void ReadSatData(CString satStr, Date date, SatDataType channel);
+	void ReadSatData(const string& satStr, SatDataType channel);
 	void DrawSatData(SatDataType channel, int nframe);
 
 	//ground temperature
 	float* ground_temperature_mat; //ir1
 	float* ground_temperature_mat_ir2; //ir2
 	void CreateGroundTemperatureTable(CString satStr, Date startDate, SatDataType channel);
+	void CreateGroundTemperatureTable(SatDataType channel);
 	bool ReadFixedTimeAwxData(CString satStr, float* pData, Date date, int hour, int minute, SatDataType channel, int nframe);
 	void DrawGroundTemperature(int nframe);
 

@@ -300,6 +300,45 @@ void SatDataCloud::ReadSatData(CString satStr, Date date, SatDataType channel) /
 	}
 }
 
+void SatDataCloud::ReadSatData(const string& satStr, SatDataType channel)
+{
+	float* pData = new float[NFRAME * WIDTH * HEIGHT];
+	for (int i = 0; i < NFRAME; i++)
+	{
+		ReadSingleSatData(const_cast<char*>(satStr.c_str()), pData + i * WIDTH * HEIGHT, channel, i);
+	}
+	for (int i = 0; i < NFRAME * WIDTH * HEIGHT; i++)
+	{
+		dataRange[(int)channel].x = min(dataRange[(int)channel].x, pData[i]);
+		dataRange[(int)channel].y = max(dataRange[(int)channel].y, pData[i]);
+	}
+
+	switch (channel)
+	{
+	case IR1:
+		ir1Data = pData;
+		break;
+	case IR2:
+		ir2Data = pData;
+		break;
+	case IR3:
+		ir3Data = pData;
+		break;
+	case IR4:
+		ir4Data = pData;
+		break;
+	case VIS:
+		visData = pData;
+		break;
+	case CLC:
+		clcData = pData;
+		break;
+	case CTT:
+		cttData = pData;
+		break;
+	}
+}
+
 void SatDataCloud::TimeChannel2FileName(CString satStr, char strFile[256], Date date, int hour, int minute, SatDataType channel) //No.11
 {
 	CString channelStr;
@@ -998,8 +1037,8 @@ void SatDataCloud::Run(Date date, string satStr, string savePath, string saveNam
 	//ReadSatData(Date(2013, 7, 10), CLC); // CLC和CTT是什么？
 	//ReadSatData(Date(2013, 7, 10), CTT);
 
-	CreateGroundTemperatureTable(satStr.c_str(), date, IR1);  //原文为Date(2013, 6, 26)，不知有何深意
-	CreateGroundTemperatureTable(satStr.c_str(), date, IR2);
+	CreateGroundTemperatureTable(satStr.c_str(), Date(2013, 6, 26), IR1);  //原文为Date(2013, 6, 26)，不知有何深意
+	CreateGroundTemperatureTable(satStr.c_str(), Date(2013, 6, 26), IR2);
 	CloudGroundSegment(); //云景分离
 	//ModifyReflectance();
 	IR4Temperature2Reflectance(); // 用于计算有效半径
@@ -1018,6 +1057,43 @@ void SatDataCloud::Run(Date date, string satStr, string savePath, string saveNam
 	//GenerateCloudFieldIfoFile(0,1);
 	//GenerateIfoForDobashi();
 }
+
+void SatDataCloud::Run(const vector<string>& typName, const string& savePath, const string& saveName, int height, int width)
+{
+	this->HEIGHT = height;
+	this->WIDTH = width;
+
+	if(typName.size() != 5)
+	{	
+		cout<<"需要5个频段的数据"<<endl;
+		return;
+	}
+
+	ReadSatData(typName[0], VIS);
+	ReadSatData(typName[1], IR1);
+	ReadSatData(typName[2], IR2);
+	ReadSatData(typName[3], IR3);
+	ReadSatData(typName[4], IR4);
+
+	CreateLongLatTable();
+	CreateAltitudeTable();
+	CreateSatZenithAzimuthIfo();
+	CreateSunZenithAzimuthIfo(Date(2013,7,10));   // 使用随便一个Date以适配参数，实际不使用
+
+	CreateGroundTemperatureTable(IR1);
+	CreateGroundTemperatureTable(IR2);
+
+	CloudGroundSegment(); //云景分离
+	IR4Temperature2Reflectance(); // 用于计算有效半径
+	Classification();
+	CreateCloudTopHeight();
+	ComputeCloudProperties_MEA();
+	ComputeGeoThick();
+
+	string tmp = savePath + saveName;
+	GenerateVolumeFile(tmp, 0, NFRAME);
+}
+
 
 void SatDataCloud::GenerateExtinctionFieldFile(int startFrame, int endFrame, int Z_Res) //No.2
 {
@@ -1445,11 +1521,56 @@ void SatDataCloud::CreateGroundTemperatureTable(CString satStr, Date startDate, 
 		cout << "Ground Tempeature:  " << nframe << endl;
 	}
 	if (channel == IR1)
+	{
+		std::ofstream outfile("./ground_temp_IR1.dat", std::ios_base::binary | std::ios_base::out);
+		unsigned int gSize = (unsigned int)(WIDTH * HEIGHT);
+		outfile.write((char *)&gSize, sizeof(gSize));
+		outfile.write((char *)ground_temperature_mat_temp, sizeof(float) * gSize);
+
+		//for (int i = 0; i < gSize; i++)
+		//	cout << ground_temperature_mat_temp[i] << endl;
+
 		ground_temperature_mat = ground_temperature_mat_temp;
-	else
+	}
+	else if(channel == IR2)
+	{
+		std::ofstream outfile("./ground_temp_IR2.dat", std::ios_base::binary | std::ios_base::out);
+		unsigned int gSize = (unsigned int)(WIDTH * HEIGHT);
+		outfile.write((char *)&gSize, sizeof(gSize));
+		outfile.write((char *)ground_temperature_mat_temp, sizeof(float) * gSize);
+
 		ground_temperature_mat_ir2 = ground_temperature_mat_temp;
+	}
+
 	delete[] pData;
 }
+
+void SatDataCloud::CreateGroundTemperatureTable(SatDataType channel) //No.9
+{
+	if (channel == IR1)
+	{
+		ground_temperature_mat = new float[WIDTH * HEIGHT];
+
+		std::ifstream infile("./ground_temp_IR1.dat");
+		unsigned int gSize;
+		infile.read((char *)(&gSize), sizeof(gSize));
+		infile.read((char *)ground_temperature_mat, sizeof(float) * gSize);
+
+		//for (int i = 0; i < gSize; i++)
+		//	cout << ground_temperature_mat[i] << endl;
+
+	}
+	else if (channel == IR2)
+	{
+		ground_temperature_mat_ir2 = new float[WIDTH * HEIGHT];
+
+		std::ifstream infile("./ground_temp_IR2.dat");
+		unsigned int gSize;
+		infile.read((char *)(&gSize), sizeof(gSize));
+		infile.read((char *)ground_temperature_mat_ir2, sizeof(float) * gSize);
+	}
+}
+
 
 bool SatDataCloud::ReadFixedTimeAwxData(CString satStr, float* pData, Date date, int hour, int minute, SatDataType channel, int nframe) //No.8
 {
@@ -2201,8 +2322,10 @@ void SatDataCloud::GenerateVolumeFile(const string& savePath, int startFrame, in
 				int qCbh = max((int)(((cbh_scale - minHeight) / normHeight) * zaxis), 0);
 
 				float ext = (extinctionPlane[nframe * WIDTH * HEIGHT + WIDTH * i + j] - minExt) / normExt;
+				if(maxExt == minExt)
+					ext = extinctionPlane[nframe * WIDTH * HEIGHT + WIDTH * i + j];
 
-				for (int k = 0; k < qCth; k++)
+				for (int k = qCbh; k < qCth; k++)
 				{
 					long long idx1 = (long long)HEIGHT * (long long)WIDTH * (long long)zaxis * nframe;
 					long long idx2 = (long long)WIDTH * (long long)zaxis * (long long)i;
