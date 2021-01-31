@@ -1,4 +1,8 @@
 project(tcdsmModeler)
+cmake_minimum_required(VERSION 3.12)
+
+SET(CMAKE_DEBUG_POSTFIX "")
+
 
 SET(TARGET_H
         export.h
@@ -12,29 +16,68 @@ SET(TARGET_SRC
         simplemodeler.cpp
 )
 
-add_library(${PROJECT_NAME} SHARED ${TARGET_H} ${TARGET_SRC})
+
+if(CLOUD_PYTHON)
+    list(APPEND TARGET_SRC Gen2py.cpp Gen2py_helper.cpp)
+    list(APPEND TARGET_H Gen2py_helper.h)
+    pybind11_add_module(${PROJECT_NAME} ${TARGET_H} ${TARGET_SRC})
+else()
+    add_library(${PROJECT_NAME} SHARED ${TARGET_H} ${TARGET_SRC})
+endif()
+
+
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "WRF/TCDSM")
+
 
 target_link_libraries(
     ${PROJECT_NAME}
-    tcdsmModel
-    # PRIVATE tcdsmUtil
-    # PRIVATE tcdsmModel
-    # netCDFCxx-4.2
-    # ${CLOUD_OSG_LIBS}
+    PRIVATE tcdsmModel
 )
 
-install(
-    TARGETS ${PROJECT_NAME}
-    CONFIGURATIONS Debug
-    ARCHIVE DESTINATION lib/Debug
-    LIBRARY DESTINATION bin/Debug
-    RUNTIME DESTINATION bin/Debug
-)
-install(
-    TARGETS ${PROJECT_NAME}
-    CONFIGURATIONS Release
-    ARCHIVE DESTINATION lib/Release
-    LIBRARY DESTINATION bin/Release
-    RUNTIME DESTINATION bin/Release
-)
+
+if(CLOUD_PYTHON AND WIN32)
+    add_custom_command(
+        TARGET ${PROJECT_NAME}
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                    $<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/tcdsmModeld.dll> 
+                    $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/tcdsmModel.dll>
+                    ${CLOUD_BINARY_DIR}/Python/TCDSM/xml
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    $<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/tcdsmUtild.dll> 
+                    $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/tcdsmUtil.dll>
+                    ${CLOUD_BINARY_DIR}/Python/TCDSM/xml
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                    ${cloud_opencv_shared_files_list} 
+                    ${CLOUD_BINARY_DIR}/Python/TCDSM/xml
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    ${CLOUD_netCDF_DLLS}
+                    ${CLOUD_BINARY_DIR}/Python/TCDSM/xml
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    ${CLOUD_OSG_DLLS}
+                    ${CLOUD_BINARY_DIR}/Python/TCDSM/xml
+    )
+endif()
+
+
+if(CLOUD_PYTHON)
+    install(
+        TARGETS ${PROJECT_NAME}
+        LIBRARY DESTINATION ${CLOUD_BINARY_DIR}/Python/TCDSM/xml
+    )
+else()
+    install(
+        TARGETS ${PROJECT_NAME}
+        CONFIGURATIONS Debug
+        ARCHIVE DESTINATION lib/Debug
+        LIBRARY DESTINATION bin/Debug
+        RUNTIME DESTINATION bin/Debug
+    )
+    install(
+        TARGETS ${PROJECT_NAME}
+        CONFIGURATIONS Release
+        ARCHIVE DESTINATION lib/Release
+        LIBRARY DESTINATION bin/Release
+        RUNTIME DESTINATION bin/Release
+    )
+endif()
