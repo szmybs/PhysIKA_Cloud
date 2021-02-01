@@ -11,8 +11,8 @@
 	2. CLOUD_PYTHON  -  python接口
 	3. CLOUD_IMG_CUMULUS  -  RGB图像生成积云
 	4. CLOUD_SAT_CUMULUS  -  卫星云图生成积云（不在项目计划内）
-	5. CLOUD_SAT_TYPHOON  -  卫星云图生成台风（暂无Python接口）
-	6. CLOUD_WRF  -  WRF数据生成台风（暂未完成） 
+	5. CLOUD_SAT_TYPHOON  -  卫星云图生成台风
+	6. CLOUD_WRF  -  WRF数据生成台风
 	7. EXAMPLE_SATIMG_TYPHOON  -  卫星云图生成台风示例（仅在勾选CLOUD_SAT_TYPHOON下勾选此项）
 	8. EXAMPLE_SATIMG_CUMULUS  -  卫星云图生成积云示例（仅在勾选CLOUD_SAT_CUMULUS下勾选此项）（不在项目计划内）
 	9. EXAMPLE_WRF  -  WRF示例（仅在勾选CLOUD_WRF下勾选此项）
