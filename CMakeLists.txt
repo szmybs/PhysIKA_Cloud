@@ -245,19 +245,28 @@ include_directories(
 )
 
 
-
 option(CLOUD_PYTHON "option for python interface" OFF)
 if(CLOUD_PYTHON)
-    add_subdirectory(${CLOUD_SOURCE_DIR}/Extern)
 
-    # 借用OpenCV作为锚点
+    add_library(COPY_DEPENDENCE ${CLOUD_SOURCE_DIR}/Extern/copy_file_dependence.cpp)
+    set_target_properties(COPY_DEPENDENCE PROPERTIES FOLDER "ExternalProjectTargets")
+
     add_custom_command(
-        TARGET CLOUD_OpenCV
+        TARGET COPY_DEPENDENCE
         PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory 
                     ${CLOUD_SOURCE_DIR}/Python/
                     ${CLOUD_BINARY_DIR}/Python/
+        
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                    ${CLOUD_SOURCE_DIR}/Cplusplus/SatImage/Typhoon/ground_temp_IR1.dat 
+                    ${CLOUD_BINARY_DIR}/Python/Typhoon/xml
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                    ${CLOUD_SOURCE_DIR}/Cplusplus/SatImage/Typhoon/ground_temp_IR2.dat 
+                    ${CLOUD_BINARY_DIR}/Python/Typhoon/xml
     )
+
+    add_subdirectory(${CLOUD_SOURCE_DIR}/Extern)
 endif()
 
 

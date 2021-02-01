@@ -22,8 +22,13 @@ if __name__ == '__main__':
 
     # run!
     tcdsmModeler.execute(netCDF_file_path, sim_data_dir)
+    
+    extra_info = {}
+    extra_info['file_name'] = sim_data_filename
+    extra_info['frame_sum'] = 1
+    extra_info['animation'] = 'false'
 
     out_xml_file_path = upload_date_dir + '/' + 'tcdsm_config_file.xml'
-    xml_parsed.write_result_xml(out_xml_file_path, sim_data_filename)
+    xml_parsed.write_result_xml(out_xml_file_path, extra_info)
     #将路径输出到标准输出
     sys.stdout.write(out_xml_file_path)

@@ -23,6 +23,7 @@ target_link_libraries(
     PRIVATE CLOUD_OpenMesh
     PRIVATE CLOUD_OpenCV
     PRIVATE CLOUD_GMP
+    PRIVATE COPY_DEPENDENCE
 )
 
 

@@ -25,6 +25,7 @@ target_link_libraries(
     ${PROJECT_NAME} 
     PRIVATE SatImageUtility
     PRIVATE CLOUD_OpenCV
+    PRIVATE COPY_DEPENDENCE
 )
 
 

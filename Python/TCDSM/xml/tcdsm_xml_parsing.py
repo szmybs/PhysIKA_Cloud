@@ -34,7 +34,7 @@ class XmlParsing:
 
     
     # 输出结果xml文件
-    def write_result_xml(self, out_xml_file_path, result_vti_filename):
+    def write_result_xml(self, out_xml_file_path, extra_info):
         with open(self.in_file_path, 'r', encoding='UTF-8') as xml_file:
             tree = ET.parse(xml_file)
             scene = tree.getroot()
@@ -43,7 +43,16 @@ class XmlParsing:
             # add 'FileName' tag
             file_name = ET.SubElement(simulation_run, 'FileName')
             file_name.set('name', '仿真文件名')
-            file_name.text = result_vti_filename
+            file_name.text = extra_info['file_name']
+            # add 'FrameSum' tag
+            frame_sum = ET.SubElement(simulation_run, 'FrameSum')
+            frame_sum.set('name', '帧总数')
+            frame_sum.text = str(extra_info['frame_sum'])
+            # add 'Animation' tag
+            animation = ET.SubElement(simulation_run, 'Animation')
+            animation.set('name', '是否支持动画')
+            animation.text = extra_info['animation']
+
             scene.append(simulation_run)
             indent(scene)
             tree.write(out_xml_file_path, encoding="utf-8", xml_declaration=True)

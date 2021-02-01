@@ -30,7 +30,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "WRF/TCDSM")
 target_link_libraries(
     ${PROJECT_NAME}
     PRIVATE tcdsmModel
-    PRIVATE CLOUD_OpenCV
+    PRIVATE COPY_DEPENDENCE
 )
 
 
@@ -45,9 +45,6 @@ if(CLOUD_PYTHON AND WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
                     $<$<CONFIG:Debug>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/tcdsmUtild.dll> 
                     $<$<CONFIG:Release>:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/tcdsmUtil.dll>
-                    ${CLOUD_BINARY_DIR}/Python/TCDSM/xml
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-                    ${cloud_opencv_shared_files_list} 
                     ${CLOUD_BINARY_DIR}/Python/TCDSM/xml
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
                     ${CLOUD_netCDF_DLLS}
