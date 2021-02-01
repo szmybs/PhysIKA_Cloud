@@ -16,7 +16,7 @@
 	7. EXAMPLE_SATIMG_TYPHOON  -  卫星云图生成台风示例（仅在勾选CLOUD_SAT_TYPHOON下勾选此项）
 	8. EXAMPLE_SATIMG_CUMULUS  -  卫星云图生成积云示例（仅在勾选CLOUD_SAT_CUMULUS下勾选此项）（不在项目计划内）
 	9. EXAMPLE_WRF  -  WRF示例（仅在勾选CLOUD_WRF下勾选此项）
-	10. USE_PREBUILT_OSG  -  是否使用预建的OSG（仅在Windows、Debug、VS2017以后版本可用）
+	10. USE_PREBUILT_OSG  -  是否使用预建的OSG（仅在Windows、Debug、VS2017以后版本可用，如果不满足条件请勿勾选此项）
 
 5. 目录结构：
 	1. Cplusplus    C++源码部分
