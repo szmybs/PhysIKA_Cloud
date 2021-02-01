@@ -245,12 +245,11 @@ include_directories(
 )
 
 
+add_library(COPY_DEPENDENCE ${CLOUD_SOURCE_DIR}/Extern/copy_file_dependence.cpp)
+set_target_properties(COPY_DEPENDENCE PROPERTIES FOLDER "ExternalProjectTargets")
+
 option(CLOUD_PYTHON "option for python interface" OFF)
 if(CLOUD_PYTHON)
-
-    add_library(COPY_DEPENDENCE ${CLOUD_SOURCE_DIR}/Extern/copy_file_dependence.cpp)
-    set_target_properties(COPY_DEPENDENCE PROPERTIES FOLDER "ExternalProjectTargets")
-
     add_custom_command(
         TARGET COPY_DEPENDENCE
         PRE_BUILD

@@ -13,11 +13,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Examples")
 
 target_link_libraries(
         ${PROJECT_NAME}
-        PRIVATE ${cloud_opencv_libs}
-        # PRIVATE ${CLOUD_OSG_LIBS}
-        # PRIVATE netCDFCxx-4.2    
-        # PRIVATE tcdsmUtil
-        # PRIVATE tcdsmModel
+        # PRIVATE ${cloud_opencv_libs}
+        PRIVATE ${CLOUD_OSG_LIBS}
+        PRIVATE netCDFCxx-4.2    
+        PRIVATE tcdsmUtil
+        PRIVATE tcdsmModel
         PRIVATE tcdsmModeler        
 )
 
