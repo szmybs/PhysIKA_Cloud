@@ -1,16 +1,16 @@
 project(Sim_Cloud)
 set(CMAKE_CXX_STANDARD 11)
 
-SET(CMAKE_DEBUG_POSTFIX "")
-
 add_definitions(-D_USE_MATH_DEFINES) 
 
 
 aux_source_directory(. SRC_LIST)
+
 if(CLOUD_PYTHON)
+	SET(CMAKE_DEBUG_POSTFIX "")
     pybind11_add_module(${PROJECT_NAME} ${SRC_LIST})
 else()
-    list(REMOVE_ITEM SRC_LIST Gen2py.cpp)
+    list(REMOVE_ITEM SRC_LIST ./Gen2py.cpp)
     add_library(${PROJECT_NAME} STATIC ${SRC_LIST})
 endif()
 

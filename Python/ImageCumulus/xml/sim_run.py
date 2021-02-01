@@ -1,7 +1,7 @@
 from sim_xml_parsing import XmlParsing
 import Sim_Cloud
 import sys
-
+import os
 # python sim_run.py 
 # E:\zhangqf\project\Sim_Cloud\xml\2021\upload_config_file.xml 
 # E:\zhangqf\project\Sim_Cloud\natural_img\ 
@@ -16,9 +16,9 @@ if __name__ == '__main__':
 
     xml_parsed = XmlParsing(upload_config_file_path)
     
-    upload_img_path = upload_file_dir + xml_parsed.upload_name
+    upload_img_path = upload_file_dir + '/' + xml_parsed.upload_name
     sim_data_filename = 'cloud'
-    sim_data_path = sim_data_dir + sim_data_filename + '.obj'
+    sim_data_path = sim_data_dir + '/' + sim_data_filename + '.obj'
     # run!
     Sim_Cloud.sim_cloud(upload_img_path, sim_data_path)
 
@@ -31,5 +31,8 @@ if __name__ == '__main__':
     extra_info['num_vertices'] = Sim_Cloud.get_num_vertices()
     extra_info['num_faces'] = Sim_Cloud.get_num_faces()
 
-    out_xml_file_path = upload_date_dir + 'sim_config_file.xml'
+    out_xml_file_path = upload_date_dir + '/' + 'sim_config_file.xml'
     xml_parsed.write_result_xml(out_xml_file_path, extra_info)
+
+    #将路径输出到标准输出
+    sys.stdout.write(out_xml_file_path)

@@ -1,15 +1,15 @@
 PROJECT(SatImageTyphoon)
 cmake_minimum_required(VERSION 3.12)
 
-SET(CMAKE_DEBUG_POSTFIX "")
-
 
 aux_source_directory(. SRC_LIST)
 
 if(CLOUD_PYTHON)
+	SET(CMAKE_DEBUG_POSTFIX "")
     pybind11_add_module(${PROJECT_NAME} ${SRC_LIST})
 else()
-    list(REMOVE_ITEM SRC_LIST Gen2py.cpp)
+    list(REMOVE_ITEM SRC_LIST ./Gen2py.cpp)
+    message("${SRC_LIST}")
     add_library(${PROJECT_NAME} STATIC ${SRC_LIST})
 endif()
 

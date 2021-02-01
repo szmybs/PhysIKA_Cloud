@@ -1,9 +1,6 @@
 project(tcdsmModeler)
 cmake_minimum_required(VERSION 3.12)
 
-SET(CMAKE_DEBUG_POSTFIX "")
-
-
 SET(TARGET_H
         export.h
         config.h
@@ -18,6 +15,7 @@ SET(TARGET_SRC
 
 
 if(CLOUD_PYTHON)
+	SET(CMAKE_DEBUG_POSTFIX "")
     list(APPEND TARGET_SRC Gen2py.cpp Gen2py_helper.cpp)
     list(APPEND TARGET_H Gen2py_helper.h)
     pybind11_add_module(${PROJECT_NAME} ${TARGET_H} ${TARGET_SRC})
@@ -32,6 +30,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "WRF/TCDSM")
 target_link_libraries(
     ${PROJECT_NAME}
     PRIVATE tcdsmModel
+    PRIVATE CLOUD_OpenCV
 )
 
 

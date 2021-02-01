@@ -24,42 +24,15 @@ class XmlParsing:
             self.in_file_path = in_file_path
             tree = ET.parse(xml_file)
             scene = tree.getroot()
-            # in 'Fluid' tag 
-            fluid = scene.find('Fluid')
-            for elem in fluid.iter():
-                tag = elem.tag
-                if(tag == 'Start'):
-                    start_list = list(map(int, elem.text.split()))
-                    self.start_x = start_list[0]
-                    self.start_y = start_list[1]
-                elif(tag == 'End'):
-                    end_list = list(map(int, elem.text.split()))
-                    self.end_x = end_list[0]
-                    self.end_y = end_list[1]
-                elif(tag == 'Vortex'):
-                    self.vortex = float(elem.text)
-                elif(tag == 'Noise'):
-                    self.noise = int(elem.text)
-            # in 'Boundary' tag
-            boundary = scene.find('Boundary')
-            for elem in boundary.iter():
-                tag = elem.tag
-                if(tag == 'Scale'):
-                    self.scale = int(elem.text)
-            # in 'Simulation' tag
-            simulation = scene.find('Simulation')
-            for elem in simulation.iter():
-                tag = elem.tag
-                if(tag == 'SimulationMethod'):
-                    self.sim_type = int(elem.text)
-                elif(tag == 'Frame'):
-                    self.frame = int(elem.text)
-            # in 'Upload' tag
-            upload = scene.find('Upload')
-            for elem in upload.iter():
-                tag = elem.tag
-                if(tag == 'File'):
-                    self.upload_name = elem.text
+            # in 'Image' tag
+            image = scene.find('Image')
+            if image:
+                for elem in image.iter():
+                    tag = elem.tag
+                    if(tag == 'Nature'):
+                        self.upload_name = elem.text
+                    
+
     
     # 输出结果xml文件
     def write_result_xml(self, out_xml_file_path, extra_info):
