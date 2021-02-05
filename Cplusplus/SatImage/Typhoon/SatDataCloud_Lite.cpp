@@ -1564,7 +1564,7 @@ void SatDataCloud::CreateGroundTemperatureTable(SatDataType channel) //No.9
 	{
 		ground_temperature_mat_ir2 = new float[WIDTH * HEIGHT];
 
-		std::ifstream infile("./ground_temp_IR2.dat");
+		std::ifstream infile("./ground_temp_IR2.dat", std::ifstream::binary);
 		unsigned int gSize;
 		infile.read((char *)(&gSize), sizeof(gSize));
 		infile.read((char *)ground_temperature_mat_ir2, sizeof(float) * gSize);

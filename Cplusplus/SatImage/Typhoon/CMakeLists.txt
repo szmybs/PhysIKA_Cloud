@@ -9,7 +9,6 @@ if(CLOUD_PYTHON)
     pybind11_add_module(${PROJECT_NAME} ${SRC_LIST})
 else()
     list(REMOVE_ITEM SRC_LIST ./Gen2py.cpp)
-    message("${SRC_LIST}")
     add_library(${PROJECT_NAME} STATIC ${SRC_LIST})
 endif()
 
