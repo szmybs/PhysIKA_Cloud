@@ -125,6 +125,7 @@ void SatDataCloud::CreateLongLatTable(void) //No.4
 	if (minlat < 0)
 		Jd_leftbottom *= -1;
 	for (int i = 0; i < HEIGHT; i++)
+	{
 		for (int j = 0; j < WIDTH; j++)
 		{
 			longitudeLatitudeTable[2 * ((HEIGHT - 1 - i) * WIDTH + j) + 0] = (minlg + j * dlg);
@@ -134,6 +135,7 @@ void SatDataCloud::CreateLongLatTable(void) //No.4
 			if (Jd < 0)
 				longitudeLatitudeTable[2 * ((HEIGHT - 1 - i) * WIDTH + j) + 1] *= -1;
 		}
+	}
 }
 
 void SatDataCloud::CreateAltitudeTable() //No.20
