@@ -1549,27 +1549,33 @@ void SatDataCloud::CreateGroundTemperatureTable(CString satStr, Date startDate, 
 
 void SatDataCloud::CreateGroundTemperatureTable(SatDataType channel) //No.9
 {
-	if (channel == IR1)
+    if (channel == IR1)
 	{
+		float* ground_temperature_mat_temp = new float[512 * 512];
 		ground_temperature_mat = new float[WIDTH * HEIGHT];
 
-		std::ifstream infile("./ground_temp_IR1.dat");
+		std::ifstream infile("./ground_temp_IR1.dat", ifstream::binary);
 		unsigned int gSize;
 		infile.read((char *)(&gSize), sizeof(gSize));
-		infile.read((char *)ground_temperature_mat, sizeof(float) * gSize);
+		infile.read((char *)ground_temperature_mat_temp, sizeof(float) * gSize);
 
-		//for (int i = 0; i < gSize; i++)
-		//	cout << ground_temperature_mat[i] << endl;
+		IntepImgData(ground_temperature_mat_temp, 512, 512, ground_temperature_mat, WIDTH, HEIGHT);
 
+        delete[] ground_temperature_mat_temp;
 	}
 	else if (channel == IR2)
 	{
+		float* ground_temperature_mat_ir2_temp = new float[512 * 512];
 		ground_temperature_mat_ir2 = new float[WIDTH * HEIGHT];
 
-		std::ifstream infile("./ground_temp_IR2.dat", std::ifstream::binary);
+		std::ifstream infile("./ground_temp_IR2.dat", ifstream::binary);
 		unsigned int gSize;
 		infile.read((char *)(&gSize), sizeof(gSize));
-		infile.read((char *)ground_temperature_mat_ir2, sizeof(float) * gSize);
+		infile.read((char *)ground_temperature_mat_ir2_temp, sizeof(float) * gSize);
+
+		IntepImgData(ground_temperature_mat_ir2_temp, 512, 512, ground_temperature_mat_ir2, WIDTH, HEIGHT);
+
+        delete[] ground_temperature_mat_ir2_temp;
 	}
 }
 
@@ -2416,7 +2422,6 @@ void SatDataCloud::Draw(DrawType type) //No.1
 	case Seg:
 		DrawPixelType(curFrame);
 		break;
-
 	case TopSurface:
 		DrawCloudTopSurface(curFrame);
 	case BottomSurface:
@@ -2435,16 +2440,12 @@ void SatDataCloud::Draw(DrawType type) //No.1
 		break;
 	}
 }
-
 void SatDataCloud::DrawPixelType(int nframe) //No.12
 {
 	if (pixelTypeList == NULL)
 		return;
-
 	glDisable(GL_LIGHTING);
-
 	float *curData = new float[3 * WIDTH * HEIGHT];
-
 	for (int i = 0; i < HEIGHT; i++)
 		for (int j = 0; j < WIDTH; j++)
 		{
@@ -2495,27 +2496,20 @@ void SatDataCloud::DrawPixelType(int nframe) //No.12
 			glVertex2f(float(j) / WIDTH, 1.0 - float(i) / HEIGHT);
 			glColor3fv(curData + 3 * ((i + 1) * WIDTH + j));
 			glVertex2f(float(j) / WIDTH, 1.0 - float(i + 1) / HEIGHT);
-
 			glColor3fv(curData + 3 * ((i + 1) * WIDTH + j + 1));
 			glVertex2f(float(j + 1) / WIDTH, 1.0 - float(i + 1) / HEIGHT);
-
 			glColor3fv(curData + 3 * (i * WIDTH + j + 1));
 			glVertex2f(float(j + 1) / WIDTH, 1.0 - float(i) / HEIGHT);
-
 			glEnd();
 		}
 	delete[] curData;
 }
-
 void SatDataCloud::DrawCloudTopSurface(int nframe) //No.16
 {
 	if (cthList == NULL)
 		return;
-
 	glEnable(GL_LIGHTING);
-
 	float *curData = new float[WIDTH * HEIGHT];
-
 	float maxData = -99999;
 	float minData = 99999;
 	for (int i = 0; i < HEIGHT; i++)
@@ -2567,7 +2561,6 @@ void SatDataCloud::DrawCloudTopSurface(int nframe) //No.16
 				PD[1] = (HEIGHT - i) * 1.0 / HEIGHT;
 				PD[2] = curData[i * WIDTH + j + 1];
 				ComputeTriangleNormal(normal, PA, PC, PD);
-
 				glNormal3dv(normal);
 				glBegin(GL_TRIANGLES);
 				glVertex3dv(PA);
@@ -2578,14 +2571,11 @@ void SatDataCloud::DrawCloudTopSurface(int nframe) //No.16
 		}
 	delete[] curData;
 }
-
 void SatDataCloud::DrawEfficientRadius(int nframe) //No.24
 {
 	if (efficientRadius_data == NULL)
 		return;
-
 	glDisable(GL_LIGHTING);
-
 	float *curData = new float[WIDTH * HEIGHT];
 	float maxData = -99999;
 	float minData = 99999;
@@ -2594,13 +2584,11 @@ void SatDataCloud::DrawEfficientRadius(int nframe) //No.24
 		{
 			maxData = max(maxData, efficientRadius_data[nframe * WIDTH * HEIGHT + i * WIDTH + j]);
 		}
-
 	for (int i = 0; i < HEIGHT; i++)
 		for (int j = 0; j < WIDTH; j++)
 		{
 			curData[i * WIDTH + j] = efficientRadius_data[nframe * WIDTH * HEIGHT + i * WIDTH + j] / maxData;
 		}
-
 	for (int i = 0; i < HEIGHT - 1; i++)
 		for (int j = 0; j < WIDTH - 1; j++)
 		{
@@ -2611,10 +2599,8 @@ void SatDataCloud::DrawEfficientRadius(int nframe) //No.24
 				glVertex2f(float(j) / WIDTH, 1.0 - float(i) / HEIGHT);
 				glColor3f(curData[(i + 1) * WIDTH + j], curData[(i + 1) * WIDTH + j], curData[(i + 1) * WIDTH + j]);
 				glVertex2f(float(j) / WIDTH, 1.0 - float((i + 1)) / HEIGHT);
-
 				glColor3f(curData[(i + 1) * WIDTH + j + 1], curData[(i + 1) * WIDTH + j + 1], curData[(i + 1) * WIDTH + j + 1]);
 				glVertex2f(float(j + 1) / WIDTH, 1.0 - float(i + 1) / HEIGHT);
-
 				glColor3f(curData[i * WIDTH + j + 1], curData[i * WIDTH + j + 1], curData[i * WIDTH + j + 1]);
 				glVertex2f(float(j + 1) / WIDTH, 1.0 - float(i) / HEIGHT);
 				glEnd();
@@ -2622,15 +2608,12 @@ void SatDataCloud::DrawEfficientRadius(int nframe) //No.24
 		}
 	delete[] curData;
 }
-
 void SatDataCloud::DrawCloudBottomSurface(int nframe) //No.27
 {
 	//cloud bottom surface
 	if (cthList == NULL || geo_thick_data == NULL)
 		return;
-
 	glEnable(GL_LIGHTING);
-
 	float *curData = new float[WIDTH * HEIGHT];
 	for (int i = 0; i < HEIGHT; i++)
 		for (int j = 0; j < WIDTH; j++)
@@ -2676,7 +2659,6 @@ void SatDataCloud::DrawCloudBottomSurface(int nframe) //No.27
 				PD[1] = (HEIGHT - i) * 1.0 / HEIGHT;
 				PD[2] = curData[i * WIDTH + j + 1];
 				ComputeTriangleNormal(normal, PA, PD, PC);
-
 				glNormal3dv(normal);
 				glBegin(GL_TRIANGLES);
 				glVertex3dv(PA);
@@ -2687,7 +2669,6 @@ void SatDataCloud::DrawCloudBottomSurface(int nframe) //No.27
 		}
 	delete[] curData;
 }
-
 void SatDataCloud::ComputeTriangleNormal(double normal[3], double PA[3], double PB[3], double PC[3]) //No.17
 {
 	double vecAB[3], vecAC[3];
@@ -2699,25 +2680,20 @@ void SatDataCloud::ComputeTriangleNormal(double normal[3], double PA[3], double 
 	normal[0] = vecAB[1] * vecAC[2] - vecAB[2] * vecAC[1];
 	normal[1] = vecAB[2] * vecAC[0] - vecAB[0] * vecAC[2];
 	normal[2] = vecAB[0] * vecAC[1] - vecAB[1] * vecAC[0];
-
 	double len = sqrt(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
 	for (int i = 0; i < 3; i++)
 	{
 		normal[i] /= len;
 	}
 }
-
 void SatDataCloud::DrawLongLatTable() //No.37
 {
 	if (longitudeLatitudeTable == NULL)
 		return;
-
 	float minLg = MAXVAL;
 	float maxLg = -MAXVAL;
-
 	float minLat = MAXVAL;
 	float maxLat = -MAXVAL;
-
 	for (int i = 0; i < HEIGHT; i++)
 		for (int j = 0; j < WIDTH; j++)
 		{
@@ -2725,11 +2701,9 @@ void SatDataCloud::DrawLongLatTable() //No.37
 			float lat = longitudeLatitudeTable[2 * (i * WIDTH + j) + 1];
 			minLat = min(minLat, lat);
 			maxLat = max(maxLat, lat);
-
 			minLg = min(minLg, lg);
 			maxLg = max(maxLg, lg);
 		}
-
 	glBegin(GL_POINTS);
 	for (int i = 0; i < HEIGHT; i++)
 		for (int j = 0; j < WIDTH; j++)
@@ -2739,21 +2713,18 @@ void SatDataCloud::DrawLongLatTable() //No.37
 			float z = cosf(lat) * cosf(lg);
 			float x = cosf(lat) * sinf(lg);
 			float y = sinf(lat);
-
 			glColor3f((lat - minLat) / (maxLat - minLat), (lg - minLg) / (maxLg - minLg) / 2.0, 0.0);
 			glVertex3f(x, y, z);
 		}
 	glEnd();
 	DrawEarth();
 }
-
 void SatDataCloud::DrawSunZenithAzimuth(int nframe) //No.48
 {
 	float minA = MAXVAL;
 	float maxA = -MAXVAL;
 	float minZ = MAXVAL;
 	float maxZ = -MAXVAL;
-
 	for (int i = 0; i < HEIGHT; i++)
 		for (int j = 0; j < WIDTH; j++)
 		{
@@ -2765,7 +2736,6 @@ void SatDataCloud::DrawSunZenithAzimuth(int nframe) //No.48
 			maxZ = max(maxZ, sunZ);
 		}
 	glEnd();
-
 	glBegin(GL_POINTS);
 	for (int i = 0; i < HEIGHT; i++)
 		for (int j = 0; j < WIDTH; j++)
@@ -2777,7 +2747,6 @@ void SatDataCloud::DrawSunZenithAzimuth(int nframe) //No.48
 			float y = cos(lat);
 			float sunZ = sunZenithAzimuth_mat[2 * (nframe * WIDTH * HEIGHT + WIDTH * i + j) + 0];
 			float sunA = sunZenithAzimuth_mat[2 * (nframe * WIDTH * HEIGHT + WIDTH * i + j) + 1];
-
 			float scale = 1.0 - (sunZ - minZ) / (maxZ - minZ);
 			glColor3f(scale, scale, scale);
 			glVertex3f(1.2 * x, 1.2 * y, 1.2 * z);
@@ -2785,7 +2754,6 @@ void SatDataCloud::DrawSunZenithAzimuth(int nframe) //No.48
 	glEnd();
 	DrawEarth();
 }
-
 void SatDataCloud::DrawEarth() //No.38
 {
 	glDisable(GL_LIGHTING);
@@ -2794,10 +2762,8 @@ void SatDataCloud::DrawEarth() //No.38
 	fp = fopen("earth_texture.dat", "rb"); //read earth texture
 	fread(earth_texture, sizeof(float), 1441 * 721 * 3, fp);
 	fclose(fp);
-
 	float dthta = 0.25;
 	float dphi = 0.25;
-
 	glBegin(GL_QUADS);
 	for (int i = 0; i < 721 - 1; i++)
 		for (int j = 0; j < 1441 - 1; j++)
@@ -2809,34 +2775,27 @@ void SatDataCloud::DrawEarth() //No.38
 			z = sin(th) * cos(ph);
 			x = sin(th) * sin(ph);
 			y = cos(th);
-
 			glColor3fv(earth_texture + i * 1441 * 3 + j * 3);
 			glVertex3f(x, y, z);
-
 			th = (i + 1) * dthta * M_PI / 180;
 			ph = j * dphi * M_PI / 180 - M_PI;
 			z = sin(th) * cos(ph);
 			x = sin(th) * sin(ph);
 			y = cos(th);
-
 			glColor3fv(earth_texture + (i + 1) * 1441 * 3 + j * 3);
 			glVertex3f(x, y, z);
-
 			th = (i + 1) * dthta * M_PI / 180;
 			ph = (j + 1) * dphi * M_PI / 180 - M_PI;
 			z = sin(th) * cos(ph);
 			x = sin(th) * sin(ph);
 			y = cos(th);
-
 			glColor3fv(earth_texture + (i + 1) * 1441 * 3 + (j + 1) * 3);
 			glVertex3f(x, y, z);
-
 			th = i * dthta * M_PI / 180;
 			ph = (j + 1) * dphi * M_PI / 180 - M_PI;
 			z = sin(th) * cos(ph);
 			x = sin(th) * sin(ph);
 			y = cos(th);
-
 			glColor3fv(earth_texture + i * 1441 * 3 + (j + 1) * 3);
 			glVertex3f(x, y, z);
 		}
@@ -2883,7 +2842,6 @@ void SatDataCloud::DrawEarth() //No.38
 	//satellite
 	float lg = 105 * M_PI / 180; //degree
 	float lat = M_PI / 2;
-
 	glPushMatrix();
 	float z = 2 * sinf(lat) * cosf(lg);
 	float x = 2 * sinf(lat) * sinf(lg);
@@ -2891,20 +2849,16 @@ void SatDataCloud::DrawEarth() //No.38
 	glTranslatef(x, y, z);
 	glutSolidSphere(0.01, 50, 50);
 	glPopMatrix();
-
 	delete[] earth_texture;
 }
-
 void SatDataCloud::DrawGeoThick(int nframe) //No.26
 {
 	if (geo_thick_data == NULL || nframe >= NFRAME)
 		return;
 	glDisable(GL_LIGHTING);
-
 	float *curData = new float[WIDTH * HEIGHT];
 	float maxData = -MAXVAL;
 	float minData = MAXVAL;
-
 	for (int i = 0; i < HEIGHT; i++)
 		for (int j = 0; j < WIDTH; j++)
 		{
@@ -2913,7 +2867,6 @@ void SatDataCloud::DrawGeoThick(int nframe) //No.26
 				maxData = max(maxData, geo_thick_data[nframe * WIDTH * HEIGHT + i * WIDTH + j]);
 			}
 		}
-
 	for (int i = 0; i < HEIGHT; i++)
 		for (int j = 0; j < WIDTH; j++)
 		{
@@ -2934,27 +2887,22 @@ void SatDataCloud::DrawGeoThick(int nframe) //No.26
 			glVertex2f(float(j) / WIDTH, 1.0 - float(i) / HEIGHT);
 			glColor3f(curData[(i + 1) * WIDTH + j], curData[(i + 1) * WIDTH + j], curData[(i + 1) * WIDTH + j]);
 			glVertex2f(float(j) / WIDTH, 1.0 - float((i + 1)) / HEIGHT);
-
 			glColor3f(curData[(i + 1) * WIDTH + j + 1], curData[(i + 1) * WIDTH + j + 1], curData[(i + 1) * WIDTH + j + 1]);
 			glVertex2f(float(j + 1) / WIDTH, 1.0 - float(i + 1) / HEIGHT);
-
 			glColor3f(curData[i * WIDTH + j + 1], curData[i * WIDTH + j + 1], curData[i * WIDTH + j + 1]);
 			glVertex2f(float(j + 1) / WIDTH, 1.0 - float(i) / HEIGHT);
 			glEnd();
 		}
 	delete[] curData;
 }
-
 void SatDataCloud::DrawExt(int nframe) //No.58
 {
 	if (extinctionPlane == NULL)
 		return;
 	glDisable(GL_LIGHTING);
-
 	float *curData = new float[WIDTH * HEIGHT];
 	float maxData = -MAXVAL;
 	float minData = MAXVAL;
-
 	for (int i = 0; i < HEIGHT; i++)
 		for (int j = 0; j < WIDTH; j++)
 		{
@@ -2981,10 +2929,8 @@ void SatDataCloud::DrawExt(int nframe) //No.58
 				glVertex2f(float(j) / WIDTH, 1.0 - float(i) / HEIGHT);
 				glColor3f(curData[(i + 1) * WIDTH + j], curData[(i + 1) * WIDTH + j], curData[(i + 1) * WIDTH + j]);
 				glVertex2f(float(j) / WIDTH, 1.0 - float((i + 1)) / HEIGHT);
-
 				glColor3f(curData[(i + 1) * WIDTH + j + 1], curData[(i + 1) * WIDTH + j + 1], curData[(i + 1) * WIDTH + j + 1]);
 				glVertex2f(float(j + 1) / WIDTH, 1.0 - float(i + 1) / HEIGHT);
-
 				glColor3f(curData[i * WIDTH + j + 1], curData[i * WIDTH + j + 1], curData[i * WIDTH + j + 1]);
 				glVertex2f(float(j + 1) / WIDTH, 1.0 - float(i) / HEIGHT);
 				glEnd();
