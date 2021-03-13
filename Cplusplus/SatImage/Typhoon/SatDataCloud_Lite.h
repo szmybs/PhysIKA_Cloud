@@ -145,6 +145,7 @@ public:
 
 	Date SatDate;
 
+	string satelliteName;
 public:
 	SatDataCloud(void);
 	void Init();
@@ -196,6 +197,7 @@ public:
 	float* ground_temperature_mat; //ir1
 	float* ground_temperature_mat_ir2; //ir2
 	void CreateGroundTemperatureTable(CString satStr, Date startDate, SatDataType channel);
+	void CreateGroundTemperatureTable(SatDataType channel, int difference);
 	void CreateGroundTemperatureTable(SatDataType channel);
 	bool ReadFixedTimeAwxData(CString satStr, float* pData, Date date, int hour, int minute, SatDataType channel, int nframe);
 	void DrawGroundTemperature(int nframe);

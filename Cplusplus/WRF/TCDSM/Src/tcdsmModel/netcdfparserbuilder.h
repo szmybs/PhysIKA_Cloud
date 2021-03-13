@@ -55,5 +55,4 @@ namespace TCDSM {
 
 }
 
-
 #endif // TCDSM_MODEL_NETCDFOPERATORBUILDER_H

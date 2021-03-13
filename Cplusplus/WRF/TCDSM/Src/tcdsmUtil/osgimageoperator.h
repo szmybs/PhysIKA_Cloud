@@ -25,7 +25,4 @@ namespace TCDSM{
         };
     }
 }
-
-
-
 #endif // TCDSM_UTIL_OSGIMAGEOPERATOR_H

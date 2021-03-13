@@ -547,56 +547,66 @@ bool SatDataCloud::ReadSingleSatData(char* filename, float* pData, SatDataType c
 	int img_height = firstHead.iRecordsOfData;
 	fseek(fp, img_width * firstHead.iRecordsOfHeader * sizeof(byte), SEEK_SET); //kkkkkkkkkkkkkkkkkkkkkkkkkkk  note here
 
-	byte* dataTable = new byte[img_width * img_height];
-	fread(dataTable, sizeof(byte), img_width * img_height, fp);
+	satelliteName = string(secondHead.strSatelliteName);
 
-	float* img_data = new float[img_width * img_height];
-	for (int i = 0; i < img_height; i++)
-		for (int j = 0; j < img_width; j++)
-		{
-			if (channel == VIS || channel == IR1 || channel == IR2 || channel == IR3 || channel == IR4)
+	//cout << string(secondHead.strSatelliteName) << endl;
+	if (string(secondHead.strSatelliteName) != "GOES-16")
+	{
+		byte* dataTable = new byte[img_width * img_height];
+		fread(dataTable, sizeof(byte), img_width * img_height, fp);
+
+		float* img_data = new float[img_width * img_height];
+		for (int i = 0; i < img_height; i++)
+			for (int j = 0; j < img_width; j++)
 			{
-				if (secondHead.iChannel != 4)
-					img_data[i * img_width + j] = calibrationTable[4 * dataTable[i * img_width + j]] * 0.01; //IR1--4
+				if (channel == VIS || channel == IR1 || channel == IR2 || channel == IR3 || channel == IR4)
+				{
+					if (secondHead.iChannel != 4)
+						img_data[i * img_width + j] = calibrationTable[4 * dataTable[i * img_width + j]] * 0.01; //IR1--4
+					else
+					{
+						img_data[i * img_width + j] = min(1.0, calibrationTable[dataTable[i * img_width + j]] * 0.0001); //vis
+					}
+				}
 				else
 				{
-					img_data[i * img_width + j] = min(1.0, calibrationTable[dataTable[i * img_width + j]] * 0.0001); //vis
+					if (channel == CLC)
+					{
+						img_data[i * img_width + j] = dataTable[i * img_width + j];
+					}
+					if (channel == CTT)
+					{
+						img_data[i * img_width + j] = dataTable[i * img_width + j];
+					}
 				}
+			}
+
+		if (channel == VIS || channel == IR1 || channel == IR2 || channel == IR3 || channel == IR4)
+		{
+			if (WIDTH != img_width || HEIGHT != img_height)
+			{
+				IntepImgData(img_data, img_width, img_height, pData, WIDTH, HEIGHT);
 			}
 			else
 			{
-				if (channel == CLC)
-				{
-					img_data[i * img_width + j] = dataTable[i * img_width + j];
-				}
-				if (channel == CTT)
-				{
-					img_data[i * img_width + j] = dataTable[i * img_width + j];
-				}
+				for (int i = 0; i < img_height; i++)
+					for (int j = 0; j < img_width; j++)
+						pData[i * img_width + j] = img_data[i * img_width + j];
 			}
 		}
 
-	if (channel == VIS || channel == IR1 || channel == IR2 || channel == IR3 || channel == IR4)
-	{
-		if (WIDTH != img_width || HEIGHT != img_height)
+		if (channel == CLC || channel == CTT)
 		{
-			IntepImgData(img_data, img_width, img_height, pData, WIDTH, HEIGHT);
+			IntepImgData(nframe, channel, img_data, img_width, img_height, pData, WIDTH, HEIGHT);
 		}
-		else
-		{
-			for (int i = 0; i < img_height; i++)
-				for (int j = 0; j < img_width; j++)
-					pData[i * img_width + j] = img_data[i * img_width + j];
-		}
+		delete[] img_data;
+		delete[] dataTable;
 	}
-
-	if (channel == CLC || channel == CTT)
+	else
 	{
-		IntepImgData(nframe, channel, img_data, img_width, img_height, pData, WIDTH, HEIGHT);
+		fread(pData, sizeof(float), img_width * img_height, fp);
 	}
 	fclose(fp);
-	delete[] img_data;
-	delete[] dataTable;
 	return true;
 }
 
@@ -1082,8 +1092,8 @@ void SatDataCloud::Run(const vector<string>& typName, const string& savePath, co
 	CreateSatZenithAzimuthIfo();
 	CreateSunZenithAzimuthIfo(Date(2013,7,10));   // 使用随便一个Date以适配参数，实际不使用
 
-	CreateGroundTemperatureTable(IR1);
-	CreateGroundTemperatureTable(IR2);
+	CreateGroundTemperatureTable(IR1, 0);
+	CreateGroundTemperatureTable(IR2, 0);
 
 	CloudGroundSegment(); //云景分离
 	IR4Temperature2Reflectance(); // 用于计算有效半径
@@ -1261,7 +1271,8 @@ void SatDataCloud::LabelCirrus(int nframe) //No.30
 
 				float temp = ground_temperature_mat[nframe * WIDTH * HEIGHT + i * WIDTH + j] - ground_temperature_mat_ir2[nframe * WIDTH * HEIGHT + i * WIDTH + j] + 1.6;
 
-				if (ir1Data[nframe * WIDTH * HEIGHT + i * WIDTH + j] < 273 && ir1Data[nframe * WIDTH * HEIGHT + i * WIDTH + j] - ir2Data[nframe * WIDTH * HEIGHT + i * WIDTH + j] > temp)
+				//if (ir1Data[nframe * WIDTH * HEIGHT + i * WIDTH + j] < 273 && ir1Data[nframe * WIDTH * HEIGHT + i * WIDTH + j] - ir2Data[nframe * WIDTH * HEIGHT + i * WIDTH + j] > temp)
+				if (ir1Data[nframe * WIDTH * HEIGHT + i * WIDTH + j] < 273 && ir1Data[nframe * WIDTH * HEIGHT + i * WIDTH + j] - ir2Data[nframe * WIDTH * HEIGHT + i * WIDTH + j] > 1.4)
 					pixelTypeList[nframe * WIDTH * HEIGHT + i * WIDTH + j] = 2; //thin cloud  or thin cirrus
 
 				//if(irWV-irT>0)
@@ -1412,6 +1423,7 @@ void SatDataCloud::CloudGroundSegment() //No.13
 	PrintRunIfo("CLoud-Ground");
 	pixelTypeList = new int[NFRAME * WIDTH * HEIGHT];
 
+	int count = 0;
 	float* pData = new float[WIDTH * HEIGHT];
 	for (int nframe = 0; nframe < NFRAME; nframe++)
 	{
@@ -1424,16 +1436,25 @@ void SatDataCloud::CloudGroundSegment() //No.13
 			{
 				pixelTypeList[nframe * WIDTH * HEIGHT + i * WIDTH + j] = 0; //ground
 
-				float tmp = ground_temperature_mat[nframe * WIDTH * HEIGHT + i * WIDTH + j];
-				if (tmp - pData[i * WIDTH + j] > CLOUD_GROUND_SEG_THRESHOLD)
-					pixelTypeList[nframe * WIDTH * HEIGHT + i * WIDTH + j] = 1; //cloud
-				if (ir1Data[nframe * WIDTH * HEIGHT + i * WIDTH + j] - ir2Data[nframe * WIDTH * HEIGHT + i * WIDTH + j] > 1 && ir1Data[nframe * WIDTH * HEIGHT + i * WIDTH + j] < 250)
+				if (satelliteName != "GOES-16")
+				{
+					float tmp = ground_temperature_mat[nframe * WIDTH * HEIGHT + i * WIDTH + j];
+					if (tmp - pData[i * WIDTH + j] > CLOUD_GROUND_SEG_THRESHOLD)
+						pixelTypeList[nframe * WIDTH * HEIGHT + i * WIDTH + j] = 1; //cloud
+				}
+				if (ir1Data[nframe * WIDTH * HEIGHT + i * WIDTH + j] - ir2Data[nframe * WIDTH * HEIGHT + i * WIDTH + j] > 1 && ir1Data[nframe * WIDTH * HEIGHT + i * WIDTH + j] < 233)
 					pixelTypeList[nframe * WIDTH * HEIGHT + i * WIDTH + j] = 1; //thin cloud,partial cloud
 
-				if (sunZenithAzimuth_mat[2 * (i * WIDTH + j) + 0] < 60.0 * M_PI / 180 && visData[nframe * WIDTH * HEIGHT + i * WIDTH + j] > 0.5)
+				//if (sunZenithAzimuth_mat[2 * (i * WIDTH + j) + 0] < 60.0 * M_PI / 180 && visData[nframe * WIDTH * HEIGHT + i * WIDTH + j] > 0.5)
+				//	pixelTypeList[nframe * WIDTH * HEIGHT + i * WIDTH + j] = 1; //clouds have large reflectance
+				if(visData[nframe * WIDTH * HEIGHT + i * WIDTH + j] > 0.45)
 					pixelTypeList[nframe * WIDTH * HEIGHT + i * WIDTH + j] = 1; //clouds have large reflectance
+
+				if (pixelTypeList[nframe * WIDTH * HEIGHT + i * WIDTH + j] > 0)
+					count++;
 			}
 	}
+	cout << "has cloud nums :" << count << endl;
 	delete[] pData;
 }
 
@@ -1551,7 +1572,7 @@ void SatDataCloud::CreateGroundTemperatureTable(SatDataType channel) //No.9
 {
     if (channel == IR1)
 	{
-		float* ground_temperature_mat_temp = new float[512 * 512];
+		float* ground_temperature_mat_temp = new float[WIDTH * HEIGHT];
 		ground_temperature_mat = new float[WIDTH * HEIGHT];
 
 		std::ifstream infile("./ground_temp_IR1.dat", ifstream::binary);
@@ -1559,13 +1580,13 @@ void SatDataCloud::CreateGroundTemperatureTable(SatDataType channel) //No.9
 		infile.read((char *)(&gSize), sizeof(gSize));
 		infile.read((char *)ground_temperature_mat_temp, sizeof(float) * gSize);
 
-		IntepImgData(ground_temperature_mat_temp, 512, 512, ground_temperature_mat, WIDTH, HEIGHT);
+		IntepImgData(ground_temperature_mat_temp, WIDTH, HEIGHT, ground_temperature_mat, WIDTH, HEIGHT);
 
         delete[] ground_temperature_mat_temp;
 	}
 	else if (channel == IR2)
 	{
-		float* ground_temperature_mat_ir2_temp = new float[512 * 512];
+		float* ground_temperature_mat_ir2_temp = new float[WIDTH * HEIGHT];
 		ground_temperature_mat_ir2 = new float[WIDTH * HEIGHT];
 
 		std::ifstream infile("./ground_temp_IR2.dat", ifstream::binary);
@@ -1573,12 +1594,55 @@ void SatDataCloud::CreateGroundTemperatureTable(SatDataType channel) //No.9
 		infile.read((char *)(&gSize), sizeof(gSize));
 		infile.read((char *)ground_temperature_mat_ir2_temp, sizeof(float) * gSize);
 
-		IntepImgData(ground_temperature_mat_ir2_temp, 512, 512, ground_temperature_mat_ir2, WIDTH, HEIGHT);
+		IntepImgData(ground_temperature_mat_ir2_temp, WIDTH, HEIGHT, ground_temperature_mat_ir2, WIDTH, HEIGHT);
 
         delete[] ground_temperature_mat_ir2_temp;
 	}
 }
 
+void SatDataCloud::CreateGroundTemperatureTable(SatDataType channel, int difference)
+{
+	float* temp = nullptr;
+	if (channel == IR1)
+	{
+		temp = ir1Data;
+	}
+	else if (channel == IR2)
+	{
+		temp = ir2Data;
+	}
+
+	float* temperatureTable = new float[NFRAME * WIDTH * HEIGHT];
+	for (int nframe = 0; nframe < NFRAME; nframe++)
+	{
+		float max = -9999;
+		for (int i = 0; i < HEIGHT; i++)
+		{
+			for (int j = 0; j < WIDTH; j++)
+			{
+				if(temp[nframe * WIDTH * HEIGHT + i * WIDTH + j] > max)
+					max = temp[nframe * WIDTH * HEIGHT + i * WIDTH + j];
+			}
+		}
+
+		for (int i = 0; i < HEIGHT; i++)
+		{
+			for (int j = 0; j < WIDTH; j++)
+			{
+				temperatureTable[nframe * WIDTH * HEIGHT + i * WIDTH + j] = max;
+			}
+		}
+	}
+
+	if (channel == IR1)
+	{
+		ground_temperature_mat = temperatureTable;
+	}
+	else if (channel == IR2)
+	{
+		ground_temperature_mat_ir2 = temperatureTable;
+	}
+}
 
 bool SatDataCloud::ReadFixedTimeAwxData(CString satStr, float* pData, Date date, int hour, int minute, SatDataType channel, int nframe) //No.8
 {
@@ -1780,7 +1844,7 @@ void SatDataCloud::ComputeCloudProperties_MEA() //No.23
 
 					float u = fabs(cos(satZenith_mat[WIDTH * i + j]));
 					float u0 = cos(sunZenithAzimuth_mat[2 * (nframe * WIDTH * HEIGHT + i * WIDTH + j) + 0]);
-					float phi = satAzimuth_mat[512 * i + j] - sunZenithAzimuth_mat[2 * (nframe * WIDTH * WIDTH + i * WIDTH + j) + 1];
+					float phi = satAzimuth_mat[HEIGHT * i + j] - sunZenithAzimuth_mat[2 * (nframe * WIDTH * WIDTH + i * WIDTH + j) + 1];
 					//float k1=2*M_PI/wavelength1;
 					//float k2=2*M_PI/wavelength2;
 					//float kk1=4*M_PI*refIdx1/wavelength1;
@@ -1812,9 +1876,9 @@ void SatDataCloud::ComputeCloudProperties_MEA() //No.23
 						float B = -2.5;
 						float C = 10.664;
 						float RInf01 = (A + B * (u + u0) + C * u * u0 + phase1) / (4 * (u + u0));
-						float visR = visData[nframe * 512 * 512 + i * 512 + j];
+						float visR = visData[nframe * HEIGHT * WIDTH + i * HEIGHT + j];
 						//float t1=1.0/(K0u*K0u0/(RInf01-visData[nframe*512*512+i*512+j])-A1/(1-A1));
-						float t1 = (RInf01 - visData[nframe * 512 * 512 + i * 512 + j]) / (K0u * K0u0);
+						float t1 = (RInf01 - visData[nframe * HEIGHT * WIDTH + i * HEIGHT + j]) / (K0u * K0u0);
 						float alpha = 1.07;
 						float Thickness1 = (1.0 / t1 - alpha) / (0.75 * (1 - g1));
 
@@ -1876,7 +1940,7 @@ void SatDataCloud::ComputeCloudProperties_MEA() //No.23
 
 					float u = fabs(cos(satZenith_mat[WIDTH * i + j]));
 					float u0 = cos(sunZenithAzimuth_mat[2 * (nframe * WIDTH * HEIGHT + i * WIDTH + j) + 0]);
-					float phi = satAzimuth_mat[512 * i + j] - sunZenithAzimuth_mat[2 * (nframe * WIDTH * WIDTH + i * WIDTH + j) + 1];
+					float phi = satAzimuth_mat[HEIGHT * i + j] - sunZenithAzimuth_mat[2 * (nframe * WIDTH * WIDTH + i * WIDTH + j) + 1];
 					/*			float k1=2*M_PI/wavelength1;
 					float k2=2*M_PI/wavelength2;
 					float kk1=4*M_PI*refIdx1/wavelength1;
@@ -1913,10 +1977,10 @@ void SatDataCloud::ComputeCloudProperties_MEA() //No.23
 						float B = 1.186;
 						float C = 5.157;
 						float RInf01 = (A + B * (u + u0) + C * u * u0 + phase1) / (4 * (u + u0));
-						float visR = visData[nframe * 512 * 512 + i * 512 + j];
+						float visR = visData[nframe * HEIGHT * WIDTH + i * HEIGHT + j];
 						//	   float t1=1.0/(K0u*K0u0/(RInf01-visData[nframe*512*512+i*512+j])-A1/(1-A1));
-						float t1 = 1.0 / (K0u * K0u0 / (RInf01 - visData[nframe * 512 * 512 + i * 512 + j]));
-						float vis = visData[nframe * 512 * 512 + i * 512 + j];
+						float t1 = 1.0 / (K0u * K0u0 / (RInf01 - visData[nframe * HEIGHT * WIDTH + i * HEIGHT + j]));
+						float vis = visData[nframe * HEIGHT * WIDTH + i * HEIGHT + j];
 						float Thickness1 = 4 * (1.0 / t1 - 1.072) / (3 * (1 - g1));
 
 						if (Thickness1 < 0 || Thickness1 > MAXVAL)
@@ -2038,7 +2102,8 @@ void SatDataCloud::ComputeGeoThick() //No.25
 					}
 					while (deltaZ > cth)
 					{
-						deltaZ = cth * visData[nframe * WIDTH * HEIGHT + i * WIDTH + j];
+						//deltaZ = cth * visData[nframe * WIDTH * HEIGHT + i * WIDTH + j];
+						deltaZ *= 0.9;
 					}
 					//cout<<"water deltaz:  "<<deltaZ<<endl;
 					geo_thick_data[nframe * WIDTH * HEIGHT + i * WIDTH + j] = deltaZ;
@@ -2103,7 +2168,8 @@ void SatDataCloud::ComputeGeoThick() //No.25
 					}
 					while (deltaZ > cth)
 					{
-						deltaZ = cth * visData[nframe * WIDTH * HEIGHT + i * WIDTH + j];
+						//deltaZ = cth * visData[nframe * WIDTH * HEIGHT + i * WIDTH + j];
+						deltaZ *= 0.9;
 					}
 					geo_thick_data[nframe * WIDTH * HEIGHT + i * WIDTH + j] = deltaZ;
 					extinctionPlane[nframe * WIDTH * HEIGHT + i * WIDTH + j] = beta;
@@ -2317,6 +2383,7 @@ void SatDataCloud::GenerateVolumeFile(const string& savePath, int startFrame, in
 	std:cout << "size :" << size << endl;
 	vector<float> volumeData(size, 0);
 
+	int count = 0;
 	for (int nframe = startFrame; nframe < endFrame; nframe++)
 	{
 		for (int i = 0; i < HEIGHT; i++)
@@ -2329,11 +2396,17 @@ void SatDataCloud::GenerateVolumeFile(const string& savePath, int startFrame, in
 				int qCth = min((int)(((cth - minHeight) / normHeight) * zaxis), zaxis);
 				int qCbh = max((int)(((cbh_scale - minHeight) / normHeight) * zaxis), 0);
 
-				float ext = (extinctionPlane[nframe * WIDTH * HEIGHT + WIDTH * i + j] - minExt) / normExt;
+				//float ext = (extinctionPlane[nframe * WIDTH * HEIGHT + WIDTH * i + j] - minExt) / normExt;
+				float ext = extinctionPlane[nframe * WIDTH * HEIGHT + WIDTH * i + j] / normExt;
 				if(maxExt == minExt)
 					ext = extinctionPlane[nframe * WIDTH * HEIGHT + WIDTH * i + j];
 
-				for (int k = qCbh; k < qCth; k++)
+				//if (qCbh <= qCth)
+				//if(extinctionPlane[nframe * WIDTH * HEIGHT + WIDTH * i + j] > 0)
+				if(ext > 0)
+					count++;
+
+				for (int k = qCbh; k <= qCth; k++)
 				{
 					long long idx1 = (long long)HEIGHT * (long long)WIDTH * (long long)zaxis * nframe;
 					long long idx2 = (long long)WIDTH * (long long)zaxis * (long long)i;
@@ -2344,6 +2417,8 @@ void SatDataCloud::GenerateVolumeFile(const string& savePath, int startFrame, in
 			}
 		}
 	}
+
+	cout << "paint cloud nums: " << count << endl;
 
 	string tmp = savePath;
 	// WriteVTI(zaxis-1, WIDTH-1, HEIGHT-1, volumeData, tmp + "_ZWH.vti");
