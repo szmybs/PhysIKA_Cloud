@@ -18,9 +18,9 @@ set(CLOUD_BINARY_DIR ${PROJECT_BINARY_DIR})
 if(${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR})
     set(CMAKE_INSTALL_PREFIX ${CLOUD_BINARY_DIR}/install CACHE PATH ${CLOUD_BINARY_DIR} FORCE)
 
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CLOUD_BINARY_DIR}/lib)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CLOUD_BINARY_DIR}/bin)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CLOUD_BINARY_DIR}/bin)
 endif()
 
 
@@ -133,7 +133,6 @@ endif()
 
 
 # import netCDF-C
-# 未完成
 if(WIN32)
     set(CLOUD_netCDF_ROOT ${CLOUD_SOURCE_DIR}/Extern/netCDF-4.7.4)
     include_directories(
@@ -163,13 +162,6 @@ if(USE_PREBUILT_OSG AND CLOUD_WRF)
     endif()
 elseif(NOT USE_PREBUILT_OSG AND CLOUD_WRF)
     if(WIN32)
-        # set(CLOUD_OSG_DLLS "")
-        # set(CLOUD_OSG_SOURCE_DIR ${CLOUD_SOURCE_DIR}/Extern/OpenSceneGraph-3.6.5)
-        # set(CLOUD_OSG_BINARY_DIR ${CLOUD_BINARY_DIR}/Extern/OpenSceneGraph-3.6.5/build)
-        # include_directories(
-        #     ${CLOUD_OSG_SOURCE_DIR}/include
-        #     ${CLOUD_OSG_BINARY_DIR}/include
-        # )
         include(${CLOUD_SOURCE_DIR}/OpenSceneGraph.cmake)
     endif()
 endif()
