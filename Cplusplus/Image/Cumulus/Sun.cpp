@@ -66,8 +66,8 @@ void Sun::CreateSunColor(Pixel pixel, Image image)
 	avg_cor.R /= brighter_Number;
 	avg_cor.G /= brighter_Number;
 	avg_cor.B /= brighter_Number;
-	ofstream out("../output/suncolor_test.txt");
-	out << "Sun Color: " << avg_cor.R << " " << avg_cor.G << " " << avg_cor.B << endl;
+	//ofstream out("../output/suncolor_test.txt");
+	//out << "Sun Color: " << avg_cor.R << " " << avg_cor.G << " " << avg_cor.B << endl;
 
 
 	sun_color = avg_cor;//¼ÆËãÌ«ÑôÉ«²Ê

@@ -1,28 +1,23 @@
 # physIKA_Cloud
 
 1. 请一定使用64位编译器；
-2. 请一定在Windows平台下使用；
-3. 请在clone时使用 git clone https://github.com/szmybs/PhysIKA_Cloud.git --recursive
-   或者clone后使用 git submodule init    +    git submodule update
-   以下载pybind11子模块；
+2. 需要CUDA和PhysIKA；
 
-4. Configure选项：
-	1. CLOUD_EULER  -  欧拉法
-	2. CLOUD_PYTHON  -  python接口
+3. Configure选项：
+	1. CLOUD_PYTHON  -  python接口
+	2. CLOUD_EVOLUTION_BASED_PHYSICS - 基于物理的形状演化
 	3. CLOUD_IMG_CUMULUS  -  RGB图像生成积云
-	4. CLOUD_SAT_CUMULUS  -  卫星云图生成积云（不在项目计划内）
-	5. CLOUD_SAT_TYPHOON  -  卫星云图生成台风
-	6. CLOUD_WRF  -  WRF数据生成台风
-	7. EXAMPLE_SATIMG_TYPHOON  -  卫星云图生成台风示例（仅在勾选CLOUD_SAT_TYPHOON下勾选此项）
-	8. EXAMPLE_SATIMG_CUMULUS  -  卫星云图生成积云示例（仅在勾选CLOUD_SAT_CUMULUS下勾选此项）（不在项目计划内）
-	9. EXAMPLE_WRF  -  WRF示例（仅在勾选CLOUD_WRF下勾选此项）
-	10. USE_PREBUILT_OSG  -  是否使用预建的OSG（仅在Windows、Debug、VS2017以后版本可用，如果不满足条件请勿勾选此项）
+	4. CLOUD_SAT_TYPHOON  -  卫星云图生成台风
+	5. CLOUD_WRF  -  WRF数据生成台风
+	6. EXAMPLE_SATIMG_TYPHOON  -  卫星云图生成台风示例（仅能在勾选CLOUD_SAT_TYPHOON且未勾选CLOUD_PYTHON下勾选此项）
+	7. EXAMPLE_WRF  -  WRF示例（仅能在勾选CLOUD_WRF且未勾选CLOUD_PYTHON下勾选此项）
+	8. USE_PREBUILT_OSG  -  是否使用预建的OSG（仅在Windows、Debug、VS2017以后版本可用，如果不满足条件请勿勾选此项）
 
-5. 目录结构：
+4. 目录结构：
 	1. Cplusplus    C++源码部分
 	2. Examples    示例代码部分, 示意各部分如何使用
 	3. Python    python接口代码部分
 
-6. BUILD完成后一定INSTALL以自动拷贝动态链接库；
+5. BUILD完成后一定INSTALL以自动拷贝动态链接库，Python接口相关文件和所需动态链接库会拷贝到 PROJECT_BINARY_DIR/Python 中；
 
-7. python接口使用方式详见各txt文件
+6. python接口使用方式详见各txt文件

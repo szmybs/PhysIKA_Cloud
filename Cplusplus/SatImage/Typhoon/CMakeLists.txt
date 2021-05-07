@@ -13,7 +13,7 @@ else()
 endif()
 
 
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "SatImage")
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "${FOLDER_PREFIX}SatImage")
 
 
 include_directories(
@@ -32,7 +32,7 @@ target_link_libraries(
 if(CLOUD_PYTHON)
     install(
         TARGETS ${PROJECT_NAME}
-        LIBRARY DESTINATION ${CLOUD_BINARY_DIR}/Python/Typhoon/xml
+        LIBRARY DESTINATION ${CLOUD_BINARY_DIR}/Python/SatImageTyphoon/xml
     )
 else()
     install(
@@ -49,6 +49,6 @@ else()
     set(HEADER_FILES global.h SatDataCloud_Lite.h)
     install(
         FILES ${HEADER_FILES}
-        DESTINATION include/Typhoon
+        DESTINATION include/SatImageTyphoon
     )
 endif()

@@ -1,3 +1,3 @@
 if(CLOUD_WRF)
-    add_subdirectory(./TCDSM)
+    add_subdirectory(./WRFVisualization)
 endif()

@@ -5,6 +5,7 @@
 #include"numeric.h"
 #include"vector2.h"
 
+
 extern void RefineMesh_Rev(float** points, int n, string output_filename);
 
 Mesh::Mesh()
@@ -111,68 +112,118 @@ void Mesh::delaunay_triangulation(vector<cv::Point> contour)
 	CGAL::Polygon_mesh_processing::stitch_borders(sm);
 	CGAL::Polygon_mesh_processing::isotropic_remeshing(CGAL::faces(sm), target_edge_length, sm);
 	CGAL::Polygon_mesh_processing::keep_largest_connected_components(sm, 1);
-
-	ofstream os("../output/basemesh.off");
-	os << sm;
-	os.close();
-	cout << "face count is " << face_count << endl;
-	std::cout << "There are " << count << " facets in the domain." << std::endl;
-
+	
+	fin << sm;
+	
+	
+	//ofstream os("../output/basemesh.off");
+	//os << sm;
+	//os.close();
+	//cout << "face count is " << face_count << endl;
+	//std::cout << "There are " << count << " facets in the domain." << std::endl;
+	
 }
 
 void Mesh::ImportBaseMesh()
 {
-	ifstream fin;
-	fin.open("../output/basemesh.off", std::ofstream::in);
-	if (fin.fail()){
-		std::cerr << "打开新文件失败！" << std::endl;
-	}
-	else{
-		string s;
-		//空过第一行
+	
+	//ifstream fin;
+	//fin.open("../output/basemesh.off", std::ofstream::in);
+	//if (fin.fail()){
+	//	std::cerr << "打开新文件失败！" << std::endl;
+	//}
+	//else{
+	//	string s;
+	//	//空过第一行
+	//	getline(fin, s);
+	//	//读节点数、面片数、边数
+	//	getline(fin, s);
+	//	size_t pos = s.find(' ');
+	//	ver_number = atoi(s.substr(0, pos).c_str());
+	//	s = s.substr(pos + 1);
+	//	pos = s.find(' ');
+	//	face_number = atoi(s.substr(0, pos).c_str());
+	//	edge_number = atoi(s.substr(pos + 1).c_str());
+	//	vertexList = new float[ver_number * 3];
+	//	faceList = new int[face_number * 4];
+	//	for (int i = 0; i < ver_number; i++){
+	//		float x, y, z;
+	//		getline(fin, s);
+	//		pos = s.find(' ');
+	//		x = atof(s.substr(0, pos).c_str());
+	//		s = s.substr(pos + 1);
+	//		pos = s.find(' ');
+	//		y = atof(s.substr(0, pos).c_str());
+	//		z = atof(s.substr(pos + 1).c_str());
+	//		vertexList[3 * i + 0] = x;
+	//		vertexList[3 * i + 1] = y;
+	//		vertexList[3 * i + 2] = z;
+	//	}
+	//	for (int i = 0; i < face_number; i++){
+	//		int num, a, b, c;
+	//		getline(fin, s);
+	//		pos = s.find(' ');
+	//		num = atoi(s.substr(0, pos).c_str());
+	//		s = s.substr(pos + 1);
+	//		pos = s.find(' ');
+	//		a = atoi(s.substr(0, pos).c_str());
+	//		s = s.substr(pos + 1);
+	//		pos = s.find(' ');
+	//		b = atoi(s.substr(0, pos).c_str());
+	//		c = atoi(s.substr(pos + 1).c_str());
+	//		faceList[4 * i + 0] = num;
+	//		faceList[4 * i + 1] = a;
+	//		faceList[4 * i + 2] = b;
+	//		faceList[4 * i + 3] = c;
+	//	}
+	//}
+	//fin.close();
+	
+	
+	string s;
+	//空过第一行
+	getline(fin, s);
+	//读节点数、面片数、边数
+	getline(fin, s);
+	size_t pos = s.find(' ');
+	ver_number = atoi(s.substr(0, pos).c_str());
+	s = s.substr(pos + 1);
+	pos = s.find(' ');
+	face_number = atoi(s.substr(0, pos).c_str());
+	edge_number = atoi(s.substr(pos + 1).c_str());
+	vertexList = new float[ver_number * 3];
+	faceList = new int[face_number * 4];
+	for (int i = 0; i < ver_number; i++) {
+		float x, y, z;
 		getline(fin, s);
-		//读节点数、面片数、边数
-		getline(fin, s);
-		size_t pos = s.find(' ');
-		ver_number = atoi(s.substr(0, pos).c_str());
+		pos = s.find(' ');
+		x = atof(s.substr(0, pos).c_str());
 		s = s.substr(pos + 1);
 		pos = s.find(' ');
-		face_number = atoi(s.substr(0, pos).c_str());
-		edge_number = atoi(s.substr(pos + 1).c_str());
-		vertexList = new float[ver_number * 3];
-		faceList = new int[face_number * 4];
-		for (int i = 0; i < ver_number; i++){
-			float x, y, z;
-			getline(fin, s);
-			pos = s.find(' ');
-			x = atof(s.substr(0, pos).c_str());
-			s = s.substr(pos + 1);
-			pos = s.find(' ');
-			y = atof(s.substr(0, pos).c_str());
-			z = atof(s.substr(pos + 1).c_str());
-			vertexList[3 * i + 0] = x;
-			vertexList[3 * i + 1] = y;
-			vertexList[3 * i + 2] = z;
-		}
-		for (int i = 0; i < face_number; i++){
-			int num, a, b, c;
-			getline(fin, s);
-			pos = s.find(' ');
-			num = atoi(s.substr(0, pos).c_str());
-			s = s.substr(pos + 1);
-			pos = s.find(' ');
-			a = atoi(s.substr(0, pos).c_str());
-			s = s.substr(pos + 1);
-			pos = s.find(' ');
-			b = atoi(s.substr(0, pos).c_str());
-			c = atoi(s.substr(pos + 1).c_str());
-			faceList[4 * i + 0] = num;
-			faceList[4 * i + 1] = a;
-			faceList[4 * i + 2] = b;
-			faceList[4 * i + 3] = c;
-		}
+		y = atof(s.substr(0, pos).c_str());
+		z = atof(s.substr(pos + 1).c_str());
+		vertexList[3 * i + 0] = x;
+		vertexList[3 * i + 1] = y;
+		vertexList[3 * i + 2] = z;
 	}
-	fin.close();
+	for (int i = 0; i < face_number; i++) {
+		int num, a, b, c;
+		getline(fin, s);
+		pos = s.find(' ');
+		num = atoi(s.substr(0, pos).c_str());
+		s = s.substr(pos + 1);
+		pos = s.find(' ');
+		a = atoi(s.substr(0, pos).c_str());
+		s = s.substr(pos + 1);
+		pos = s.find(' ');
+		b = atoi(s.substr(0, pos).c_str());
+		c = atoi(s.substr(pos + 1).c_str());
+		faceList[4 * i + 0] = num;
+		faceList[4 * i + 1] = a;
+		faceList[4 * i + 2] = b;
+		faceList[4 * i + 3] = c;
+	}
+	
 }
 
 void Mesh::CreatBaseMesh()

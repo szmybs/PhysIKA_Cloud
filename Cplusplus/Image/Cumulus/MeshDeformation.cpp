@@ -1039,7 +1039,8 @@ void MeshDeformation::CreateEntireHeightFieldAndMesh()
 		faceList[3 * nFace + face_id * 3 + 1] = face[2];
 		faceList[3 * nFace + face_id * 3 + 2] = face[1];
 	}
-	ofstream  out("../output/temp.off");
+	
+	ofstream  out("./temp.off");
 	out << "OFF" << endl;
 	out << 2 * nVer - boundaryVerList.size() << " " << 2 * nFace << " " << 0 << endl;
 	for (int i = 0; i < ptList.size(); i++)
@@ -1050,10 +1051,10 @@ void MeshDeformation::CreateEntireHeightFieldAndMesh()
 	{
 		out << 3 << " " << faceList[3 * i + 0] << " " << faceList[3 * i + 1] << " " << faceList[3 * i + 2] << endl;
 	}
-
+	
 	ClearMesh(deformedMesh);
-	OpenMesh::IO::read_mesh(deformedMesh, "../output/temp.off");
-
+	OpenMesh::IO::read_mesh(deformedMesh, "./temp.off");
+	
 	NormalizeMesh(deformedMesh);
 
 	delete[] accumulatedBoundaryCountList;

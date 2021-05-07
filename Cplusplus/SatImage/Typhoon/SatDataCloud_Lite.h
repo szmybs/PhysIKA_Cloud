@@ -154,7 +154,7 @@ public:
 
 	// my add to generate XML file used in vtk.js
 	void GenerateVolumeFile(const string& savePath, int startFrame, int endFrame);
-	bool WriteVTI(int length, int width, int height, const std::vector<float>& data, std::string& path);
+	// bool WriteVTI(int length, int width, int height, const std::vector<float>& data, std::string& path);
 	// void ExportCloudXMLVolume(const std::vector<float> data, const std::string& savePath);
 
 	//position information

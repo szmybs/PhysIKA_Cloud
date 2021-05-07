@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.12)
 
 aux_source_directory(. SRC_LIST)
 add_library(${PROJECT_NAME} STATIC ${SRC_LIST})
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "SatImage")
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "${FOLDER_PREFIX}SatImage")
 
 install(
     TARGETS ${PROJECT_NAME}

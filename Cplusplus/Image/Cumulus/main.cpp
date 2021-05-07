@@ -55,7 +55,7 @@ void half_mesh(string& upload_filename) {
 	cloud.CreateCloudMesh(image, pixel, sky, mesh, cloud.heightField);
 
 	//------------------
-	cloud.ExportCloudMesh(mesh, "../output/test.off");
+	cloud.ExportCloudMesh(mesh, "./half_cloud.off");
 
 	ext_info.sun_color = vector<float>(3);
 	ext_info.sun_color[0] = sun.sun_color.R;
@@ -71,7 +71,7 @@ void half_mesh(string& upload_filename) {
 void mesh_deform(string& sim_filename) {
 	MeshDeformation* meshDeformation = new MeshDeformation();
 
-	string basemesh("../output/test.off");
+	string basemesh("./half_cloud.off");
 	meshDeformation->CreateMesh(basemesh);
 
 	cout << "Create Mesh DONE!" << endl;

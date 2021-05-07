@@ -47,7 +47,7 @@ public:
 	//---------------
 
 	//---------------
-	void ExportCloudMesh(Mesh mesh, char* filename);
+	void ExportCloudMesh(Mesh& mesh, char* filename);
 	//---------------
 	
 };

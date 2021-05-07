@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 include(ExternalProject)
 
-project(Physika_Cloud)
+project(PhysIKA_Cloud)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON) 
+set(CMAKE_CXX_STANDARD 11 CACHE STRING "CXX STANDARD VERSION 11,14,17")      
 
 IF(MSVC)
     SET( CMAKE_DEBUG_POSTFIX "d" )
@@ -21,8 +22,29 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR})
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CLOUD_BINARY_DIR}/lib)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CLOUD_BINARY_DIR}/bin)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CLOUD_BINARY_DIR}/bin)
-endif()
 
+    set(FOLDER_PREFIX "")
+
+    set(PhysIKA_Source_DIR "")
+else()
+    
+    find_package(PhysIKA REQUIRED)
+    
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/)
+    string(REGEX REPLACE "//" "" CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
+
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/)
+    string(REGEX REPLACE "//" "" CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
+    string(REGEX REPLACE "//" "" CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+    set(FOLDER_PREFIX "Examples/App_Cloud/")
+
+    set(PhysIKA_Source_DIR ${CMAKE_SOURCE_DIR}/Source)
+
+    add_definitions(-DUnderPhysika)
+endif()
 
 
 # import OpenCV part
@@ -37,7 +59,7 @@ if(UNIX)
     message("UNIX")
 elseif(WIN32)
     add_library(CLOUD_OpenCV ${CLOUD_SOURCE_DIR}/Extern/opencv_interface.cpp)
-    set_target_properties(CLOUD_OpenCV PROPERTIES FOLDER "ExternalProjectTargets")
+    set_target_properties(CLOUD_OpenCV PROPERTIES FOLDER "${FOLDER_PREFIX}ExternalProjectTargets")
 
     add_custom_command(
         TARGET CLOUD_OpenCV
@@ -104,6 +126,7 @@ elseif(WIN32)
         CMAKE_ARGS -DWITH_CGAL_Qt5=OFF -DCGAL_DIR=${CLOUD_CGAL_SOURCE_DIR} -DBOOST_ROOT=${CLOUD_BOOST_ROOT}
                 -DCMAKE_INSTALL_PREFIX=${CLOUD_CGAL_BINARY_DIR}/install
     )
+    set_target_properties(CLOUD_CGAL PROPERTIES FOLDER "${FOLDER_PREFIX}ExternalProjectTargets")
 
     set(CLOUD_gmp_INCLUDE_DIR ${CLOUD_CGAL_SOURCE_DIR}/auxiliary/gmp/include)
     set(CLOUD_mpfr_INCLUDE_DIR ${CLOUD_CGAL_SOURCE_DIR}/auxiliary/gmp/include)
@@ -147,8 +170,8 @@ endif()
 
 
 # import osg
-option(USE_PREBUILT_OSG "option for OpenSceneGraph Windows Binaries" ON)
-option(CLOUD_WRF "option for wrf" OFF)
+option(USE_PREBUILT_OSG "option for OpenSceneGraph Windows Binaries" OFF)
+option(CLOUD_WRF "option for wrf" ON)
 
 if(USE_PREBUILT_OSG AND CLOUD_WRF)
     if(WIN32)
@@ -179,7 +202,7 @@ if(UNIX)
     message("UNIX")
 elseif(WIN32)
     add_library(CLOUD_OpenMesh ${CLOUD_SOURCE_DIR}/Extern/openmesh_interface.cpp)
-    set_target_properties(CLOUD_OpenMesh PROPERTIES FOLDER "ExternalProjectTargets")
+    set_target_properties(CLOUD_OpenMesh PROPERTIES FOLDER "${FOLDER_PREFIX}ExternalProjectTargets")
 
     add_custom_command(
         TARGET CLOUD_OpenMesh
@@ -238,7 +261,7 @@ include_directories(
 
 
 add_library(COPY_DEPENDENCE ${CLOUD_SOURCE_DIR}/Extern/copy_file_dependence.cpp)
-set_target_properties(COPY_DEPENDENCE PROPERTIES FOLDER "ExternalProjectTargets")
+set_target_properties(COPY_DEPENDENCE PROPERTIES FOLDER "${FOLDER_PREFIX}ExternalProjectTargets")
 
 option(CLOUD_PYTHON "option for python interface" OFF)
 if(CLOUD_PYTHON)
@@ -256,7 +279,6 @@ if(CLOUD_PYTHON)
                     ${CLOUD_SOURCE_DIR}/Cplusplus/SatImage/Typhoon/ground_temp_IR2.dat 
                     ${CLOUD_BINARY_DIR}/Python/Typhoon/xml
     )
-
     add_subdirectory(${CLOUD_SOURCE_DIR}/Extern)
 endif()
 

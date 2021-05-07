@@ -120,7 +120,8 @@ void Pixel::CreatePixelType(Image image, Tool tool)
 		}
 
 	delete[] CloudBoudaryPixelList;
-	ofstream out("../output/pixelifo_test.txt");
+	
+	/*ofstream out("../output/pixelifo_test.txt");
 	out << 414 << endl;
 	for (int i = 0; i<image.GetImg_height(); i++)
 		for (int j = 0; j<image.GetImg_width(); j++)
@@ -128,8 +129,8 @@ void Pixel::CreatePixelType(Image image, Tool tool)
 			out << pixelTypeList[i*image.GetImg_width() + j] << " ";
 
 		}
-	out << endl;
-
+	out << endl;*/
+	
 	//cv::Mat img(image.GetImg_height(), image.GetImg_width(),CV_8UC1);
 	//for (int i = 0; i < image.GetImg_height(); ++i) {
 	//	for (int j = 0; j < image.GetImg_width(); ++j) {
@@ -187,7 +188,7 @@ void Pixel::CreatePerfectBoundary(Image image, Mesh& mesh)
 		}
 	delete[] cloudMask;
 
-	cvSaveImage("../output/gray.jpg", g_gray);
+	//SaveImage("../output/gray.jpg", g_gray);
 
 	//------------manually modify the image---------------- ÊÖ¶¯ÐÞ¸ÄÍ¼Æ¬
 	cout << "If necessary!  modify the gray image!" << endl;

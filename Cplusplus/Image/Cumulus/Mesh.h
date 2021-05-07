@@ -12,7 +12,7 @@
 #include <CGAL/lloyd_optimize_mesh_2.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/Polygon_mesh_processing/connected_components.h>
-
+#include<sstream>
 using namespace std;
 
 class Mesh {
@@ -23,7 +23,7 @@ public:
 	int ver_number;
 	int edge_number;
 	int face_number;
-
+	stringstream fin;
 
 	struct FaceInfo2
 	{
@@ -74,4 +74,5 @@ public:
 	int*     Cloud_facelist;
 	int      Cloud_vertexnumber;
 	int      Cloud_facenumber;
+	
 };

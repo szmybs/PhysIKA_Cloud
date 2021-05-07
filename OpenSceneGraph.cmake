@@ -5,7 +5,7 @@ set(CLOUD_OSG_BIN_DIR ${CLOUD_OSG_BINARY_DIR}/bin)
 # message("${CLOUD_OSG_BIN_DIR}")
 
 add_library(CLOUD_OSG ${CLOUD_SOURCE_DIR}/Extern/openscenegraph_interface.cpp)
-set_target_properties(CLOUD_OSG PROPERTIES FOLDER "ExternalProjectTargets")
+set_target_properties(CLOUD_OSG PROPERTIES FOLDER "${FOLDER_PREFIX}ExternalProjectTargets")
 
 
 include_directories(

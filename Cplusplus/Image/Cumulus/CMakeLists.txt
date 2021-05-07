@@ -28,19 +28,18 @@ target_link_libraries(
 
 
 if(WIN32)
-    add_custom_command(
-        TARGET ${PROJECT_NAME}
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-                    ${cloud_opencv_shared_files_list} 
-                    ${CLOUD_BINARY_DIR}/Python/ImageCumulus/xml
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                    ${cloud_gmp_shared_files_list}
-                    ${CLOUD_BINARY_DIR}/Python/ImageCumulus/xml
-        # COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        #             ${PROJECT_NAME}
-        #             ${CLOUD_BINARY_DIR}/Python/ImageCumulus/xml
-    )
+    if(CLOUD_PYTHON)
+        add_custom_command(
+            TARGET ${PROJECT_NAME}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                        ${cloud_opencv_shared_files_list} 
+                        ${CLOUD_BINARY_DIR}/Python/ImageCumulus/xml
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        ${cloud_gmp_shared_files_list}
+                        ${CLOUD_BINARY_DIR}/Python/ImageCumulus/xml
+        )
+    endif()
 elseif(UNIX)
     message("UNIX")
 endif()

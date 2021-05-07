@@ -153,8 +153,11 @@ void Cloud::PropagationCylinders(Image image, Sky sky, Sun sun)
 		Cylinder curCylinder = CreateCylinder(x_index, y_index, image, sky, sun);
 		curCloudVolume.push_back(curCylinder);
 		count++;
-		if (count % 100 == 0)
-			cout << "Remain: " << path.size() - count << "  (" << x_index << "," << y_index << ")   " << curCylinder.height / 2 << endl;
+		if (count % 100 == 0) {
+			//cout << "Remain: " << path.size() - count << "  (" << x_index << "," << y_index << ")   " << curCylinder.height / 2 << endl;
+			curCylinder.height / 2;
+		}
+			
 		cloudIn.Update(curCylinder);
 
 	}
@@ -287,6 +290,7 @@ void Cloud::CreateHeightFieldHalf(Image image,Pixel pixel,Sky sky)
 
 			}
 		}
+	/*
 	ofstream out("../output/img_height.txt");
 	//out.open("clinder_height.txt");
 	for (int i = 0; i<image.GetImg_height(); i++)
@@ -303,6 +307,7 @@ void Cloud::CreateHeightFieldHalf(Image image,Pixel pixel,Sky sky)
 		out << endl;
 
 	}
+	*/
 	//cv::Mat img(image.GetImg_height(), image.GetImg_width(),CV_8UC1);
 	//for (int i = 0; i < image.GetImg_height(); ++i) {
 	//	for (int j = 0; j < image.GetImg_width(); ++j) {
@@ -312,7 +317,7 @@ void Cloud::CreateHeightFieldHalf(Image image,Pixel pixel,Sky sky)
 	//cv::namedWindow("Display window", cv::WINDOW_AUTOSIZE);
 	//cv::imshow("Display window", img);
 	//cv::waitKey(0);
-	out.close();
+	//out.close();
 }
 
 //--------------------------------------
@@ -590,7 +595,7 @@ void Cloud::CreateCloudMesh(Image image, Pixel pixel, Sky sky, Mesh &mesh, float
 //--------------
 
 //--------------
-void Cloud::ExportCloudMesh(Mesh mesh, char* filename){
+void Cloud::ExportCloudMesh(Mesh& mesh, char* filename){
 	ofstream out(filename);
 	out << "OFF" << endl;
 	out << mesh.Cloud_vertexnumber << " " << mesh.Cloud_facenumber << " " << 0 << endl;

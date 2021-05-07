@@ -4,8 +4,6 @@ include_directories(
     ${CLOUD_SOURCE_DIR}/Cplusplus
     ${CLOUD_SOURCE_DIR}/Cplusplus/SatImage
     ${CLOUD_SOURCE_DIR}/Cplusplus/SatImage/Typhoon
-    ${CLOUD_SOURCE_DIR}/Cplusplus/SatImage/Cumulus
-    ${CLOUD_SOURCE_DIR}/Cplusplus/CloudEulerGen
 
     ${CLOUD_SOURCE_DIR}/Cplusplus/WRF
     ${CLOUD_SOURCE_DIR}/Cplusplus/WRF/TCDSM
@@ -15,18 +13,11 @@ include_directories(
 
 option(EXAMPLE_SATIMG_TYPHOON "option for satimage typhoon example" OFF)
 if(EXAMPLE_SATIMG_TYPHOON)
-    add_subdirectory(./TyphoonExample)
+    add_subdirectory(./SatImageTyphoonExample)
 endif()
-
-
-option(EXAMPLE_SATIMG_CUMULUS "option for satimage cumulus example" OFF)
-if(EXAMPLE_SATIMG_CUMULUS)
-    add_subdirectory(./CumulusExample)
-endif()
-
 
 option(EXAMPLE_WRF "option for wrf data example" OFF)
 if(EXAMPLE_WRF)
-    add_subdirectory(./TCDSMExample)
+    add_subdirectory(./WRFExample)
 endif()
 

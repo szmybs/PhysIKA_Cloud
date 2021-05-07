@@ -151,7 +151,7 @@ void Sky::CreateSkyPossion(Image image, Pixel pixel)//利用插值法构造天空场景，保
 		curError = sqrt(curError / cloudPixelCount);
 
 
-		cout<<"IterCount:" <<iter<<"curError: "<<curError<<endl;
+		//cout<<"IterCount:" <<iter<<"curError: "<<curError<<endl;
 		for (int i = 0; i<image.GetImg_width()*image.GetImg_height(); i++)
 		{
 			if (isSkyPixelList[i] == 1)

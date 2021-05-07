@@ -18,7 +18,7 @@ void Image::ReadImage(const char* imgfile, Tool tool)
 	tool.PrintRunnngIfo("Reading image");
 	//read image data to img_mat_cor;
 	pImg = cvLoadImage(imgfile, 1); //从指定文件中读入图像，返回读入图像的指针，1代表彩色图
-	cvSaveImage("E:/代码/mesh_x_new/output/out.png", pImg);
+	//cvSaveImage("E:/代码/mesh_x_new/output/out.png", pImg);
 	img_width = pImg->width;
 	img_height = pImg->height;
 	img_maxWH = img_width>img_height ? img_width : img_height;
